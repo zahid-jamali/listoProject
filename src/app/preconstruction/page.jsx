@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function PreConstructionSection() {
   const projects = [
     {
@@ -7,6 +9,7 @@ export default function PreConstructionSection() {
         "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=1200&auto=format&fit=crop",
       price: "$650,000",
       completion: "Q4 2026",
+      href: "Dubai",
     },
     {
       city: "Toronto",
@@ -15,6 +18,7 @@ export default function PreConstructionSection() {
         "https://images.unsplash.com/photo-1517935706615-2717063c2225?q=80&w=1200&auto=format&fit=crop",
       price: "$650,000",
       completion: "Q4 2026",
+      href: "Toronto",
     },
     {
       city: "New York",
@@ -23,6 +27,7 @@ export default function PreConstructionSection() {
         "https://images.unsplash.com/photo-1499092346589-b9b6be3e94b2?q=80&w=1200&auto=format&fit=crop",
       price: "$650,000",
       completion: "Q4 2026",
+      href: "York",
     },
     {
       city: "Durham",
@@ -31,6 +36,7 @@ export default function PreConstructionSection() {
         "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop",
       price: "$650,000",
       completion: "Q4 2026",
+      href: "Durham",
     },
     {
       city: "Peel",
@@ -39,6 +45,7 @@ export default function PreConstructionSection() {
         "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?q=80&w=1200&auto=format&fit=crop",
       price: "$650,000",
       completion: "Q4 2026",
+      href: "Peel",
     },
     {
       city: "Halton",
@@ -47,6 +54,7 @@ export default function PreConstructionSection() {
         "https://images.unsplash.com/photo-1448630360428-65456885c650?q=80&w=1200&auto=format&fit=crop",
       price: "$800,000",
       completion: "Q4 2026",
+      href: "Halton",
     },
   ];
 
@@ -120,72 +128,74 @@ export default function PreConstructionSection() {
         {/* PROJECT GRID */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {projects.map((project, index) => (
-            <div
-              key={index}
-              className="group overflow-hidden rounded-[24px] border border-[#d9d9d9] bg-white shadow-[0_12px_35px_rgba(15,23,42,0.08)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_18px_50px_rgba(15,23,42,0.14)]"
-            >
-              <div className="relative h-[250px] overflow-hidden">
-                <img
-                  src={project.image}
-                  alt={project.city}
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
+            <Link href={`/preconstruction/${project.href}`}>
+              <div
+                key={index}
+                className="group overflow-hidden rounded-[24px] border border-[#d9d9d9] bg-white shadow-[0_12px_35px_rgba(15,23,42,0.08)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_18px_50px_rgba(15,23,42,0.14)]"
+              >
+                <div className="relative h-[250px] overflow-hidden">
+                  <img
+                    src={project.image}
+                    alt={project.city}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/90 via-[#020617]/20 to-transparent" />
-              </div>
-
-              <div className="bg-[#04122b] px-5 py-5 text-white">
-                <div className="mb-5">
-                  <h3 className="text-[26px] font-bold tracking-[-0.03em]">
-                    {project.city}
-                  </h3>
-
-                  <div className="mt-2 flex items-start gap-2 text-[13px] text-[#cbd5e1]">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.8}
-                      stroke="currentColor"
-                      className="mt-[1px] h-4 w-4 flex-shrink-0"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
-                      />
-                    </svg>
-
-                    <span className="leading-5">{project.address}</span>
-                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/90 via-[#020617]/20 to-transparent" />
                 </div>
 
-                <div className="flex items-center justify-between border-t border-white/10 pt-4">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#94a3b8]">
-                      Starting From
-                    </p>
-                    <p className="mt-1 text-lg font-bold text-[#ff7b3d]">
-                      {project.price}
-                    </p>
+                <div className="bg-[#04122b] px-5 py-5 text-white">
+                  <div className="mb-5">
+                    <h3 className="text-[26px] font-bold tracking-[-0.03em]">
+                      {project.city}
+                    </h3>
+
+                    <div className="mt-2 flex items-start gap-2 text-[13px] text-[#cbd5e1]">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.8}
+                        stroke="currentColor"
+                        className="mt-[1px] h-4 w-4 flex-shrink-0"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+                        />
+                      </svg>
+
+                      <span className="leading-5">{project.address}</span>
+                    </div>
                   </div>
 
-                  <div className="text-right">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#94a3b8]">
-                      Completion
-                    </p>
-                    <p className="mt-1 text-lg font-bold text-white">
-                      {project.completion}
-                    </p>
+                  <div className="flex items-center justify-between border-t border-white/10 pt-4">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#94a3b8]">
+                        Starting From
+                      </p>
+                      <p className="mt-1 text-lg font-bold text-[#ff7b3d]">
+                        {project.price}
+                      </p>
+                    </div>
+
+                    <div className="text-right">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#94a3b8]">
+                        Completion
+                      </p>
+                      <p className="mt-1 text-lg font-bold text-white">
+                        {project.completion}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
