@@ -9,10 +9,10 @@ const navLinks = [
   { name: "Home", href: "/" },
   { name: "Pre-Construction", href: "/preconstruction" },
   { name: "Investors", href: "/investors" },
-  { name: "Buildings", href: "/" },
-  { name: "Sell", href: "/" },
-  { name: "Exclusive", href: "/" },
-  { name: "Stats", href: "/" },
+  { name: "Buildings", href: "/buildings" },
+  { name: "Sell", href: "/sell" },
+  { name: "Exclusive", href: "/exclusive" },
+  { name: "Stats", href: "/stats" },
 ];
 
 export default function Navbar() {

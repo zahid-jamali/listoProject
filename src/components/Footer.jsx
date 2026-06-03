@@ -50,7 +50,7 @@ export default function Footer() {
             <h3 className="text-[15px] font-bold text-black">Explore</h3>
 
             <div className="mt-5 flex flex-col gap-3">
-              <FooterLink href="/">Buy</FooterLink>
+              <FooterLink href="/new-buyers">Buy</FooterLink>
               <FooterLink href="/">Rent</FooterLink>
               <FooterLink href="/">Sold</FooterLink>
               <FooterLink href="/">Pre-Construction</FooterLink>
