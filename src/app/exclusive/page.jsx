@@ -1,365 +1,568 @@
-// app/exclusive-listings/page.jsx
-
+// Premium Exclusive Listings Page - Next.js App Router
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import {
   Mail,
   Phone,
   MessageCircle,
-  //   Facebook,
-  //   Instagram,
-  //   Youtube,
-  //   Linkedin,
+  ArrowRight,
+  CheckCircle,
 } from "lucide-react";
-
 import {
   FaInstagram,
   FaLinkedinIn,
   FaFacebookF,
   FaYoutube,
+  FaTwitter,
 } from "react-icons/fa";
 
 export default function ExclusiveListingsPage() {
   const [loading, setLoading] = useState(false);
-
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     email: "",
-    type: "General",
     message: "",
   });
+  const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleType = (type) => {
-    setFormData({
-      ...formData,
-      type,
-    });
+    setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setLoading(true);
     try {
-      setLoading(true);
-
-      // API PATH AP YAHAN SET KAR DENA
-      const res = await fetch("/api/contactus", {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json",
-        },
-
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-
-      console.log(data);
-
-      alert("Message sent successfully!");
-
-      setFormData({
-        name: "",
-        phone: "",
-        email: "",
-        type: "General",
-        message: "",
-      });
+      // Simulate API call - Replace with your actual endpoint
+      await new Promise((r) => setTimeout(r, 1500));
+      setSubmitted(true);
+      setFormData({ name: "", phone: "", email: "", message: "" });
+      setTimeout(() => setSubmitted(false), 3000);
     } catch (error) {
-      console.log(error);
-
-      alert("Something went wrong!");
+      console.error("Form submission error:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  // Animation variants
+  const fadeUp = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" },
+    },
+  };
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.2 },
+    },
+  };
+
+  const staggerItem = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  };
+
+  const statsData = [
+    { value: "5,000+", label: "Verified Buyers", icon: "" },
+    { value: "$2B+", label: "Property Value", icon: "" },
+    { value: "98%", label: "Client Satisfaction", icon: "" },
+    { value: "24/7", label: "Dedicated Support", icon: "" },
+  ];
+
+  const featuresData = [
+    {
+      title: "Private Access",
+      description:
+        "Premium experience designed for high-value transactions with complete confidentiality.",
+      icon: "🔒",
+      color: "bg-orange-50",
+    },
+    {
+      title: "Qualified Buyers",
+      description:
+        "Pre-vetted network of serious investors and luxury property seekers.",
+      icon: "🎯",
+      color: "bg-blue-50",
+    },
+    {
+      title: "Maximum Privacy",
+      description:
+        "NDA-protected listings with secure viewing arrangements and discretion guaranteed.",
+      icon: "🤫",
+      color: "bg-purple-50",
+    },
+  ];
+
+  const stepsData = [
+    {
+      title: "Submit Property",
+      description: "Tell us about your property with photos and details.",
+    },
+    {
+      title: "Get Verified",
+      description: "Our team reviews and approves within 24 hours.",
+    },
+    {
+      title: "Connect Buyers",
+      description: "Qualified buyers reach you directly for private showings.",
+    },
+  ];
+
+  const contactInfo = [
+    { icon: Mail, text: "info@listo.ca", href: "mailto:info@listo.ca" },
+    { icon: Phone, text: "(905) 757-1234", href: "tel:+19057571234" },
+    {
+      icon: MessageCircle,
+      text: "+1 905 757 1234",
+      href: "https://wa.me/19057571234",
+    },
+  ];
+
+  const socialIcons = [
+    {
+      icon: FaFacebookF,
+      href: "https://facebook.com",
+      color: "hover:bg-[#1877f2]",
+    },
+    {
+      icon: FaInstagram,
+      href: "https://instagram.com",
+      color: "hover:bg-gradient-to-tr from-[#f09433] to-[#bc1888]",
+    },
+    {
+      icon: FaTwitter,
+      href: "https://twitter.com",
+      color: "hover:bg-[#1da1f2]",
+    },
+    {
+      icon: FaLinkedinIn,
+      href: "https://linkedin.com",
+      color: "hover:bg-[#0077b5]",
+    },
+    {
+      icon: FaYoutube,
+      href: "https://youtube.com",
+      color: "hover:bg-[#ff0000]",
+    },
+  ];
+
   return (
-    <main className="min-h-screen bg-[#f5f5f5] py-16 container mx-auto mt-6">
-      <div className="mx-auto max-w-[1450px] px-4 lg:px-8">
-        {/* TOP GRID */}
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
-          {/* LEFT CONTENT */}
-          <div className="flex flex-col justify-center">
-            <div>
-              <h1 className="text-[24px] font-black tracking-[-0.05em] text-[#F36B22] lg:text-[24px]">
-                Exclusive Listings
-              </h1>
+    <main className="min-h-screen bg-gradient-to-b from-white via-orange-50/20 to-white overflow-x-hidden">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 xl:py-20">
+        {/* Hero Section */}
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+          className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12 xl:gap-16"
+        >
+          <div className="text-center lg:text-left order-2 lg:order-1">
+            <motion.span
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="mb-4 sm:mb-5 inline-flex rounded-full border border-orange-200 bg-orange-50/80 backdrop-blur-sm px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-[#F36B22] shadow-sm"
+            >
+              ✨ Premium Private Marketplace
+            </motion.span>
 
-              <p className="mt-6 max-w-[650px] text-[14px] leading-8 text-neutral-600">
-                In the exclusive platform we provide you with listings to our
-                large clientele base. Our platform consists of exclusive land,
-                commercial buildings, assignments, etc that you will not see on
-                any other real estate platform.
-              </p>
-            </div>
+            <h1 className="text-2xl sm:text-3xl md:text-5xl  font-bold tracking-tight text-slate-900 leading-tight">
+              Exclusive{" "}
+              <span className="bg-gradient-to-r from-[#F36B22] to-orange-500 bg-clip-text text-transparent">
+                Listings
+              </span>
+            </h1>
 
-            {/* WHY CHOOSE */}
-            <div className="mt-10">
-              <h2 className="text-[24px] font-black tracking-[-0.04em] text-[#F36B22]">
-                Why Choose Exclusive Listings?
-              </h2>
-
-              <p className="mt-5 max-w-[650px] text-[14px] leading-8 text-neutral-600">
-                When sellers decide to offer their house through an exclusive
-                listing, they usually do so in order to maintain their privacy.
-                For security reasons, this is a popular choice for well-known
-                clients, politicians, and celebrities.
-              </p>
-            </div>
-          </div>
-
-          {/* RIGHT IMAGE */}
-          <div className="overflow-hidden rounded-[28px] shadow-[0_18px_50px_rgba(0,0,0,0.12)]">
-            {/* IMAGE AP SET KAROGY */}
-            <img
-              src="/assets/exclusive.png"
-              alt="Exclusive Listings"
-              className="h-[420px] w-full object-cover"
-            />
-          </div>
-        </div>
-
-        {/* SECOND SECTION */}
-        <div className="mt-16 grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
-          {/* IMAGE */}
-          <div className="overflow-hidden rounded-[28px] shadow-[0_18px_50px_rgba(0,0,0,0.12)]">
-            {/* IMAGE AP SET KAROGY */}
-            <img
-              src="/assets/exclusive2.png"
-              alt="Benefits"
-              className="h-[420px] w-full object-cover"
-            />
-          </div>
-
-          {/* CONTENT */}
-          <div>
-            <h2 className="max-w-[500px] text-[24px] font-black leading-tight tracking-[-0.05em] text-[#F36B22]">
-              Benefits of Exclusive Listings with Listo
-            </h2>
-
-            <p className="mt-6 max-w-[650px] text-[14px] leading-8 text-neutral-600">
-              Since it’s not listed on MLS, when you choose to list a property
-              exclusively or privately through Listo, we are able to market it
-              only to our exclusive clientele. With this help of this platform,
-              you may showcase your property to a limited number of qualified
-              purchasers or prospective buyers and invite to a private showing.
+            <p className="mx-auto mt-4 sm:mt-6 max-w-2xl text-sm sm:text-base lg:text-lg leading-relaxed text-slate-600 lg:mx-0">
+              Access off-market opportunities, luxury properties, private
+              investments and exclusive real-estate inventory unavailable on
+              traditional listing platforms.
             </p>
 
-            <div className="mt-10">
-              <h3 className="text-[24px] font-black tracking-[-0.04em] text-[#F36B22]">
-                Unlock Elite Properties with Listo
-              </h3>
+            <div className="mt-6 sm:mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
+              <motion.button
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                className="rounded-2xl bg-gradient-to-r from-[#F36B22] to-orange-500 px-5 py-3 sm:px-7 sm:py-4 text-sm sm:text-base font-semibold text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                Explore Listings →
+              </motion.button>
 
-              <p className="mt-5 max-w-[650px] text-[14px] leading-8 text-neutral-600">
-                With stringent privacy measures, personalized attention from our
-                dedicated team, and access to an elite network of sellers and
-                buyers, we invite you to unlock the doors to a select portfolio
-                of properties that enables your real estate needs.
-              </p>
-
-              {/* BUTTON */}
-              <button className="mt-8 rounded-full bg-gradient-to-r from-[#F36B22] to-[#ff8c4d] px-7 py-3 text-sm font-black uppercase tracking-[0.12em] text-white shadow-[0_12px_30px_rgba(243,107,34,0.35)] transition-all duration-300 hover:scale-105">
-                Active Exclusive Listings →
-              </button>
+              <motion.button
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                className="rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-sm px-5 py-3 sm:px-7 sm:py-4 text-sm sm:text-base font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-300"
+              >
+                Learn More
+              </motion.button>
             </div>
           </div>
-        </div>
 
-        {/* CONTACT SECTION */}
-        <div className="mt-20 grid grid-cols-1 gap-10 lg:grid-cols-[380px_1fr]">
-          {/* LEFT INFO */}
-          <div className="rounded-[28px]  p-8 ">
-            <h2 className="text-[34px] font-black tracking-[-0.05em] text-[#0B132B]">
-              Contact Us
-            </h2>
-
-            {/* EMAIL */}
-            <div className="mt-10">
-              <div className="flex items-center gap-3">
-                <Mail size={18} className="text-[#F36B22]" />
-
-                <h3 className="text-sm font-black uppercase tracking-[0.12em] text-[#0B132B]">
-                  Email:
-                </h3>
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+            className="order-1 lg:order-2"
+          >
+            <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/40 bg-gradient-to-br from-white to-orange-50/30 p-1.5 sm:p-2 shadow-2xl">
+              <div className="overflow-hidden rounded-xl sm:rounded-2xl">
+                <img
+                  src="/assets/exclusive.png"
+                  alt="Luxury property showcase"
+                  className="w-full h-[200px] sm:h-[320px] md:h-[400px] lg:h-[480px] xl:h-[540px] object-cover hover:scale-105 transition-transform duration-700"
+                />
               </div>
-
-              <p className="mt-3 text-[16px] font-medium text-neutral-600">
-                info@listo.ca
-              </p>
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-white/20 rounded-2xl sm:rounded-3xl pointer-events-none"></div>
             </div>
+          </motion.div>
+        </motion.div>
 
-            {/* PHONE */}
-            <div className="mt-8">
-              <div className="flex items-center gap-3">
-                <Phone size={18} className="text-[#F36B22]" />
-
-                <h3 className="text-sm font-black uppercase tracking-[0.12em] text-[#0B132B]">
-                  Phone
-                </h3>
-              </div>
-
-              <p className="mt-3 text-[16px] font-medium text-neutral-600">
-                (905) 757-1234
-              </p>
-            </div>
-
-            {/* WHATSAPP */}
-            <div className="mt-8">
-              <div className="flex items-center gap-3">
-                <MessageCircle size={18} className="text-[#25D366]" />
-
-                <h3 className="text-sm font-black uppercase tracking-[0.12em] text-[#0B132B]">
-                  WhatsApp
-                </h3>
-              </div>
-
-              <p className="mt-3 text-[16px] font-medium text-neutral-600">
-                +1 905 757 1234
-              </p>
-            </div>
-
-            {/* SOCIALS */}
-            <div className="mt-10">
-              <h3 className="text-sm font-black uppercase tracking-[0.12em] text-[#0B132B]">
-                Follow Us:
+        {/* Stats Section */}
+        <motion.section
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          className="mt-12 sm:mt-16 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4"
+        >
+          {statsData.map((stat, idx) => (
+            <motion.div
+              key={stat.label}
+              variants={staggerItem}
+              whileHover={{ y: -5 }}
+              className="group rounded-2xl sm:rounded-3xl border border-slate-100 bg-white p-4 sm:p-6 text-center shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer"
+            >
+              <div className="text-2xl sm:text-3xl mb-2">{stat.icon}</div>
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 group-hover:text-[#F36B22] transition-colors">
+                {stat.value}
               </h3>
+              <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-slate-500 font-medium">
+                {stat.label}
+              </p>
+            </motion.div>
+          ))}
+        </motion.section>
 
-              <div className="mt-5 flex items-center gap-4">
-                {[FaFacebookF, FaInstagram, FaYoutube, FaLinkedinIn].map(
-                  (Icon, index) => (
-                    <button
-                      key={index}
-                      className="flex h-12 w-12 items-center justify-center rounded-full border border-neutral-200 bg-white text-[#0B132B] shadow-sm transition-all duration-300 hover:border-[#F36B22] hover:bg-[#F36B22] hover:text-white"
-                    >
-                      <Icon size={18} />
-                    </button>
-                  )
+        {/* Features Section */}
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={staggerContainer}
+          className="mt-16 sm:mt-20 lg:mt-28"
+        >
+          <div className="text-center mb-8 sm:mb-12">
+            <span className="text-xs sm:text-sm font-bold text-[#F36B22] uppercase tracking-wider">
+              Why Choose Us
+            </span>
+            <h2 className="mt-3 sm:mt-4 text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900">
+              Premium Features for Elite Clients
+            </h2>
+          </div>
+          <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ">
+            {featuresData.map((feature, idx) => (
+              <motion.div
+                key={feature.title}
+                variants={staggerItem}
+                whileHover={{ y: -6 }}
+                className="group rounded-2xl sm:rounded-3xl border border-slate-100 bg-white p-5 sm:p-7 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer"
+              >
+                {/* <div
+                  className={`text-3xl sm:text-4xl mb-3 sm:mb-4 p-3 rounded-2xl ${feature.color} inline-block group-hover:scale-110 transition-transform`}
+                >
+                  {feature.icon}
+                </div> */}
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900 group-hover:text-[#F36B22] transition-colors">
+                  {feature.title}
+                </h3>
+                <p className="mt-2 sm:mt-3 text-sm sm:text-base leading-relaxed text-slate-600">
+                  {feature.description}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* How It Works */}
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="mt-20 sm:mt-24 lg:mt-32"
+        >
+          <div className="text-center">
+            <span className="text-xs sm:text-sm font-bold text-[#F36B22] uppercase tracking-wider">
+              ⚡ Simple Process
+            </span>
+            <h2 className="mt-3 sm:mt-4 text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900">
+              Sell Privately In 3 Easy Steps
+            </h2>
+            <p className="mt-3 text-slate-500 max-w-2xl mx-auto text-sm sm:text-base">
+              Simple, secure, and tailored for premium sellers
+            </p>
+          </div>
+
+          <div className="mt-10 sm:mt-12 grid gap-5 sm:gap-6 md:grid-cols-3">
+            {stepsData.map((step, i) => (
+              <motion.div
+                key={step.title}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{ y: -5 }}
+                className="relative rounded-2xl sm:rounded-3xl border border-slate-100 bg-white p-6 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300"
+              >
+                <div className="mb-5 sm:mb-6 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-orange-100 to-orange-200 text-xl sm:text-2xl font-bold text-[#F36B22]">
+                  {i + 1}
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900">
+                  {step.title}
+                </h3>
+                <p className="mt-2 sm:mt-3 text-sm sm:text-base text-slate-600">
+                  {step.description}
+                </p>
+                {i < stepsData.length - 1 && (
+                  <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 text-[#F36B22] text-2xl">
+                    →
+                  </div>
                 )}
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* Benefits Section */}
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeUp}
+          className="mt-16 sm:mt-20 lg:mt-28 grid items-center gap-8 lg:grid-cols-2 lg:gap-12"
+        >
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+            className="overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl order-2 lg:order-1"
+          >
+            <img
+              src="/assets/exclusive2.png"
+              alt="Benefits showcase"
+              className="w-full h-[200px] sm:h-[340px] md:h-[420px] lg:h-[500px] object-cover hover:scale-105 transition-transform duration-700"
+            />
+          </motion.div>
+
+          <div className="text-center lg:text-left order-1 lg:order-2">
+            <span className="text-xs sm:text-sm font-bold text-[#F36B22] uppercase tracking-wider">
+              Why Listo
+            </span>
+            <h2 className="mt-3 sm:mt-4 text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900">
+              Benefits of Working With Listo
+            </h2>
+            <p className="mt-4 sm:mt-5 text-sm sm:text-base lg:text-lg leading-relaxed text-slate-600">
+              Showcase properties privately, connect with verified buyers,
+              maintain confidentiality and unlock premium investment
+              opportunities through our exclusive network.
+            </p>
+            <div className="mt-5 space-y-2">
+              {[
+                "100% Confidential",
+                "Verified Buyers Only",
+                "No Public Listing",
+              ].map((benefit) => (
+                <div
+                  key={benefit}
+                  className="flex items-center gap-2 justify-center lg:justify-start"
+                >
+                  <CheckCircle className="w-4 h-4 text-[#F36B22]" />
+                  <span className="text-sm text-slate-700">{benefit}</span>
+                </div>
+              ))}
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="mt-6 sm:mt-8 inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 sm:px-7 sm:py-4 text-sm sm:text-base font-semibold text-white hover:bg-slate-800 transition-all duration-300"
+            >
+              Active Exclusive Listings
+              <ArrowRight size={18} />
+            </motion.button>
+          </div>
+        </motion.section>
+
+        {/* CTA Banner */}
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeUp}
+          className="mt-20 sm:mt-24 lg:mt-28 overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[40px] bg-gradient-to-br from-slate-900 to-slate-800 p-8 sm:p-12 lg:p-16 text-white relative"
+        >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#F36B22]/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl"></div>
+          <div className="relative max-w-3xl">
+            <span className="inline-block rounded-full bg-white/10 backdrop-blur-sm px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold">
+              🚀 Exclusive Network
+            </span>
+            <h2 className="mt-4 sm:mt-6 text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">
+              Access Buyers Before Anyone Else
+            </h2>
+            <p className="mt-3 sm:mt-5 text-base sm:text-lg text-white/80 max-w-2xl">
+              Join Listo's private marketplace and connect with serious buyers
+              looking for premium opportunities.
+            </p>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="mt-6 sm:mt-8 rounded-2xl bg-gradient-to-r from-[#F36B22] to-orange-500 px-6 sm:px-8 py-3 sm:py-4 font-semibold text-white shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              Join Now →
+            </motion.button>
+          </div>
+        </motion.section>
+
+        {/* Contact Section */}
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={staggerContainer}
+          className="mt-16 sm:mt-20 lg:mt-28 grid gap-5 sm:gap-6 lg:gap-8 md:grid-cols-2 xl:grid-cols-[360px_1fr]"
+        >
+          {/* Contact Info Card */}
+          <motion.div
+            variants={staggerItem}
+            className="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 p-6 sm:p-8 text-white"
+          >
+            <h3 className="text-2xl sm:text-3xl font-bold">Contact Us</h3>
+            <p className="mt-2 text-white/70 text-sm">
+              Get in touch with our team
+            </p>
+
+            <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
+              {contactInfo.map((item, idx) => (
+                <a
+                  key={idx}
+                  href={item.href}
+                  className="flex items-center gap-3 text-white/80 hover:text-white transition-colors group"
+                >
+                  <div className="p-2 rounded-xl bg-white/10 group-hover:bg-[#F36B22] transition-colors">
+                    <item.icon size={18} />
+                  </div>
+                  <span className="text-sm sm:text-base">{item.text}</span>
+                </a>
+              ))}
+            </div>
+
+            <div className="mt-6 sm:mt-8">
+              <p className="text-sm text-white/70 mb-3">Follow us</p>
+              <div className="flex flex-wrap gap-2 sm:gap-3">
+                {socialIcons.map((social, i) => (
+                  <a
+                    key={i}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-white/10 hover:${social.color} transition-all duration-300 hover:scale-110`}
+                  >
+                    <social.icon size={16} />
+                  </a>
+                ))}
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          {/* FORM */}
-          <div className="rounded-[28px] bg-white p-8 shadow-[0_15px_45px_rgba(0,0,0,0.08)]">
-            <h2 className="text-[34px] font-black tracking-[-0.05em] text-[#0B132B]">
-              Send us a note:
-            </h2>
+          {/* Contact Form */}
+          <motion.div
+            variants={staggerItem}
+            className="rounded-2xl sm:rounded-3xl border border-slate-100 bg-white p-5 sm:p-6 lg:p-8 shadow-xl"
+          >
+            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900">
+              Send Us a Message
+            </h3>
+            <p className="mt-1 text-slate-500 text-sm">
+              We'll respond within 24 hours
+            </p>
 
-            {/* FORM */}
-            <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-              {/* ROW */}
-              <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-                {/* NAME */}
-                <div>
-                  <label className="mb-3 block text-sm font-black uppercase tracking-[0.12em] text-[#0B132B]">
-                    Name
-                  </label>
-
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="Enter your first name..."
-                    className="h-[56px] w-full rounded-xl border border-neutral-200 bg-[#fafafa] px-5 text-sm outline-none transition-all focus:border-[#F36B22]"
-                    required
-                  />
-                </div>
-
-                {/* PHONE */}
-                <div>
-                  <label className="mb-3 block text-sm font-black uppercase tracking-[0.12em] text-[#0B132B]">
-                    Phone
-                  </label>
-
-                  <input
-                    type="text"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="Enter your phone number..."
-                    className="h-[56px] w-full rounded-xl border border-neutral-200 bg-[#fafafa] px-5 text-sm outline-none transition-all focus:border-[#F36B22]"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* EMAIL */}
-              <div>
-                <label className="mb-3 block text-sm font-black uppercase tracking-[0.12em] text-[#0B132B]">
-                  Email
-                </label>
-
+            <form
+              onSubmit={handleSubmit}
+              className="mt-6 sm:mt-8 space-y-4 sm:space-y-5"
+            >
+              <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
                 <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
+                  type="text"
+                  name="name"
+                  value={formData.name}
                   onChange={handleChange}
-                  placeholder="Enter your email address..."
-                  className="h-[56px] w-full rounded-xl border border-neutral-200 bg-[#fafafa] px-5 text-sm outline-none transition-all focus:border-[#F36B22]"
+                  placeholder="Full Name"
                   required
+                  className="h-11 sm:h-12 rounded-xl border border-slate-200 px-4 text-sm focus:border-[#F36B22] focus:ring-2 focus:ring-[#F36B22]/20 transition-all outline-none"
+                />
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="Phone Number"
+                  required
+                  className="h-11 sm:h-12 rounded-xl border border-slate-200 px-4 text-sm focus:border-[#F36B22] focus:ring-2 focus:ring-[#F36B22]/20 transition-all outline-none"
                 />
               </div>
 
-              {/* FOR */}
-              <div>
-                <label className="mb-4 block text-sm font-black uppercase tracking-[0.12em] text-[#0B132B]">
-                  For
-                </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Email Address"
+                required
+                className="h-11 sm:h-12 w-full rounded-xl border border-slate-200 px-4 text-sm focus:border-[#F36B22] focus:ring-2 focus:ring-[#F36B22]/20 transition-all outline-none"
+              />
 
-                <div className="flex flex-wrap items-center gap-3">
-                  {["General", "Investment", "Partnership"].map((type) => (
-                    <button
-                      type="button"
-                      key={type}
-                      onClick={() => handleType(type)}
-                      className={`rounded-full px-5 py-2 text-xs font-black uppercase tracking-[0.12em] transition-all duration-300 ${
-                        formData.type === type
-                          ? "bg-[#F36B22] text-white shadow-lg"
-                          : "border border-neutral-200 bg-white text-neutral-700"
-                      }`}
-                    >
-                      {type}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <textarea
+                rows={5}
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
+                placeholder="Tell us about your requirements..."
+                required
+                className="w-full rounded-xl border border-slate-200 p-4 text-sm focus:border-[#F36B22] focus:ring-2 focus:ring-[#F36B22]/20 transition-all outline-none resize-none"
+              />
 
-              {/* MESSAGE */}
-              <div>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  placeholder="Enter your message..."
-                  rows={7}
-                  className="w-full rounded-[20px] border border-neutral-200 bg-[#fafafa] p-5 text-sm outline-none transition-all focus:border-[#F36B22]"
-                  required
-                />
-              </div>
-
-              {/* BUTTON */}
-              <button
+              <motion.button
                 type="submit"
                 disabled={loading}
-                className="h-[58px] rounded-full bg-gradient-to-r from-[#F36B22] to-[#ff8c4d] px-10 text-sm font-black uppercase tracking-[0.12em] text-white shadow-[0_12px_30px_rgba(243,107,34,0.35)] transition-all duration-300 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-70"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                className={`w-full h-11 sm:h-12 rounded-xl font-semibold text-white transition-all duration-300 ${
+                  loading
+                    ? "bg-orange-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-[#F36B22] to-orange-500 hover:shadow-lg"
+                }`}
               >
-                {loading ? "Sending..." : "Send Message →"}
-              </button>
+                {loading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Sending...
+                  </div>
+                ) : submitted ? (
+                  "✓ Message Sent!"
+                ) : (
+                  "Send Message"
+                )}
+              </motion.button>
             </form>
-          </div>
-        </div>
+          </motion.div>
+        </motion.section>
       </div>
     </main>
   );

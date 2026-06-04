@@ -1,109 +1,100 @@
-// src/components/home/InvestorListings.jsx
-
 "use client";
 
-import { ChevronDown, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
+import { ChevronDown, Sparkles, ArrowRight } from "lucide-react";
 import { useState } from "react";
 
 const cities = [
-  {
-    name: "Toronto",
-    count: 1107,
-  },
-  {
-    name: "Dubai",
-    count: 847,
-  },
-  {
-    name: "New York",
-    count: 532,
-  },
-  {
-    name: "London",
-    count: 420,
-  },
+  { name: "Toronto", count: 1107 },
+  { name: "Dubai", count: 847 },
+  { name: "New York", count: 532 },
+  { name: "London", count: 420 },
 ];
 
 export default function InvestorListings() {
   const [selectedCity, setSelectedCity] = useState(cities[0]);
 
   return (
-    <div className="container mx-auto">
-      <section className="w-full bg-[#f5f5f5] py-16 lg:py-24">
-        <div className="mx-auto max-w-[1400px] px-4 lg:px-8">
-          {/* HEADER */}
-          <div className="max-w-5xl">
-            {/* TITLE */}
-            <h2 className="text-[34px] font-black tracking-[-0.04em] text-[#0B132B] lg:text-[42px]">
-              Listings For Investors And Developers
-            </h2>
+    <section className="bg-[#F7F8FA] py-20 lg:py-24">
+      <div className="mx-auto max-w-7xl px-6 lg:px-10">
+        <div className="text-center">
+          <span className="inline-flex rounded-full border border-[#FED7AA] bg-[#FFF7ED] px-4 py-2 text-sm font-medium text-[#F97316]">
+            Investors & Developers
+          </span>
 
-            {/* DESCRIPTION BOX */}
-            <div className="mt-6 rounded-[18px] border border-neutral-200 bg-white px-6 py-5 shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
-              <p className="text-[15px] leading-7 text-neutral-600">
-                Discover Lucrative Properties: Listo’s cutting-edge algorithm
-                identifies investment opportunities tailored for both investors
-                and developers. Our platform compares property listings against
-                Minimum-Maximum sold prices, analyzing factors such as lot size
-                to pinpoint the most profitable deals for you.
-              </p>
-            </div>
-          </div>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl">
+            Listings For Investors & Developers
+          </h2>
 
-          {/* CARD */}
-          <div className="mt-10 max-w-[720px] rounded-[26px] bg-[#03132D] p-7 shadow-[0_18px_50px_rgba(3,19,45,0.18)]">
-            {/* LABEL */}
-            <h3 className="text-[28px] font-black tracking-[-0.03em] text-white">
-              View Listings in:
+          <p className="mx-auto mt-4 max-w-3xl text-sm leading-7 text-[#6B7280] sm:text-base">
+            Discover high-potential opportunities using LISTO's proprietary
+            market intelligence. Compare listings against historical sales,
+            lot-size benchmarks and investment metrics.
+          </p>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="mx-auto mt-14 max-w-3xl rounded-[32px] border border-[#E5E7EB] bg-white p-8 shadow-[0_10px_35px_rgba(0,0,0,0.05)] lg:p-10"
+        >
+          <div className="text-center">
+            <h3 className="text-2xl font-bold text-[#111827] lg:text-3xl">
+              View Investment Listings
             </h3>
 
-            {/* SELECT */}
-            <div className="relative mt-6">
-              <select
-                value={selectedCity.name}
-                onChange={(e) => {
-                  const city = cities.find(
-                    (item) => item.name === e.target.value
-                  );
-
-                  setSelectedCity(city);
-                }}
-                className="h-[58px] w-full appearance-none rounded-xl border border-[#F36B22]/30 bg-gradient-to-r from-[#F36B22] to-[#ff8747] px-5 pr-14 text-[15px] font-bold text-white outline-none transition-all focus:border-white"
-              >
-                {cities.map((city, index) => (
-                  <option key={index} value={city.name} className="text-black">
-                    {city.name} [{city.count}]
-                  </option>
-                ))}
-              </select>
-
-              {/* ICON */}
-              <div className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-white">
-                <ChevronDown size={20} />
-              </div>
-            </div>
-
-            {/* BUTTON */}
-            <div className="mt-8 flex justify-center">
-              <button className="group flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-7 py-3 text-sm font-bold tracking-[0.12em] text-white backdrop-blur-sm transition-all duration-300 hover:border-[#F36B22] hover:bg-[#F36B22]">
-                View
-                <span className="transition-transform duration-300 group-hover:translate-x-1">
-                  →
-                </span>
-              </button>
-            </div>
-
-            {/* FOOTER TEXT */}
-            <div className="mt-8 flex items-center justify-center gap-2 text-center">
-              <Sparkles size={14} className="text-[#F36B22]" />
-
-              <p className="text-[13px] font-medium text-[#F36B22]">
-                Compare listings against Minimum-Maximum sold by lot size.
-              </p>
-            </div>
+            <p className="mt-3 text-sm leading-7 text-[#6B7280]">
+              Select a market and instantly discover curated opportunities for
+              investors, developers and land acquisition strategies.
+            </p>
           </div>
-        </div>
-      </section>
-    </div>
+
+          <div className="relative mt-8">
+            <select
+              value={selectedCity.name}
+              onChange={(e) => {
+                const city = cities.find(
+                  (item) => item.name === e.target.value
+                );
+                setSelectedCity(city);
+              }}
+              className="h-14 w-full appearance-none rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-5 pr-14 text-sm font-semibold text-[#111827] outline-none transition-all focus:border-[#F97316] focus:bg-white"
+            >
+              {cities.map((city) => (
+                <option key={city.name} value={city.name}>
+                  {city.name} ({city.count})
+                </option>
+              ))}
+            </select>
+
+            <ChevronDown
+              size={18}
+              className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-[#6B7280]"
+            />
+          </div>
+
+          <div className="mt-8 flex justify-center">
+            <motion.button
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center gap-2 rounded-2xl bg-[#081A3A] px-7 py-3 text-sm font-semibold text-white transition-all hover:bg-[#102752]"
+            >
+              View Opportunities
+              <ArrowRight size={16} />
+            </motion.button>
+          </div>
+
+          <div className="mt-8 flex items-center justify-center gap-2 rounded-2xl border border-[#FED7AA] bg-[#FFF7ED] px-4 py-3">
+            <Sparkles size={14} className="text-[#F97316]" />
+
+            <p className="text-sm font-medium text-[#F97316]">
+              Compare listings against minimum and maximum sold prices by lot size.
+            </p>
+          </div>
+        </motion.div>
+      </div>
+    </section>
   );
 }

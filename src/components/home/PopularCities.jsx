@@ -1,8 +1,7 @@
-// src/components/home/PopularCities.jsx
-
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
 
 const cities = [
@@ -16,7 +15,6 @@ const cities = [
     name: "Vaughan",
     listings: "3,200+",
     image: "/assets/vaughan.png",
-
     bg: "bg-[#F8F1D9]",
   },
   {
@@ -57,83 +55,93 @@ const cities = [
   },
 ];
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.45,
+      delay: i * 0.04,
+    },
+  }),
+};
+
 export default function PopularCities() {
   return (
-    <section className="w-full bg-[#f7f7f7] py-16 lg:py-20">
-      <div className="container m-auto">
-        <div className="mx-auto max-w-[1440px] px-5 sm:px-6 lg:px-10">
-          {/* HEADER */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-[34px] font-extrabold tracking-[-1px] text-black lg:text-[42px]">
-                Popular Cities
-              </h2>
+    <section className="bg-[#F7F8FA] py-20 lg:py-24">
+      <div className="mx-auto max-w-7xl px-6 lg:px-10">
+        {/* Header */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <span className="inline-flex rounded-full border border-[#FED7AA] bg-[#FFF7ED] px-4 py-2 text-sm font-medium text-[#F97316]">
+              Explore Locations
+            </span>
 
-              <p className="mt-2 text-[15px] text-neutral-500">
-                Explore properties across top Canadian cities
-              </p>
-            </div>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl">
+              Popular Cities
+            </h2>
 
-            <Link
-              href="/cities"
-              className="hidden items-center gap-2 text-[15px] font-semibold text-[#F58233] transition-all duration-300 hover:gap-3 md:flex"
-            >
-              View All
-              <ChevronRight size={16} />
-            </Link>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-[#6B7280] sm:text-base">
+              Discover homes, condos, rentals and investment opportunities
+              across Canada's most active real estate markets.
+            </p>
           </div>
 
-          {/* CITIES GRID */}
-          <div className="mt-10  grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
-            {cities.map((city, index) => (
+          <Link
+            href="/cities"
+            className="hidden items-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white px-5 py-3 text-sm font-semibold text-[#111827] transition-all hover:border-[#F97316] hover:text-[#F97316] md:flex"
+          >
+            View All Cities
+            <ChevronRight size={16} />
+          </Link>
+        </div>
+
+        <div className="mt-14 grid grid-cols-2 gap-5 grid-cols-2 sm:grid-cols-4 md:grid-cols-8">
+          {cities.map((city, index) => (
+            <motion.div
+              key={city.name}
+              custom={index}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeUp}
+            >
               <Link
                 href={`/city/${city.name.toLowerCase()}`}
-                key={index}
-                className="group"
+                className="group block"
               >
-                {/* CARD */}
-                <div className="flex flex-col items-center">
-                  {/* IMAGE BOX */}
-                  <div
-                    className={`relative flex h-[120px] w-full max-w-[120px] items-center justify-center overflow-hidden rounded-[18px] border border-neutral-200 shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] ${city.bg}`}
+                <div className="flex flex-col items-center text-center">
+                  <motion.div
+                    whileHover={{ y: -4 }}
+                    className={`flex h-[120px] w-[120px] items-center justify-center rounded-[28px] border border-[#E5E7EB] shadow-[0_8px_25px_rgba(0,0,0,0.04)] transition-all group-hover:shadow-[0_18px_40px_rgba(0,0,0,0.08)] ${city.bg}`}
                   >
-                    {/* GLOW EFFECT */}
-                    <div className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                      <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px]" />
-                    </div>
-
-                    {/* IMAGE */}
-                    <img
+                    <motion.img
+                      whileHover={{ scale: 1.08 }}
                       src={city.image}
                       alt={city.name}
-                      className="relative z-10 h-[52px] w-auto object-contain transition-transform duration-300 group-hover:scale-110"
+                      className="h-[54px] w-auto object-contain"
                     />
-                  </div>
+                  </motion.div>
 
-                  {/* CITY NAME */}
-                  <h3 className="mt-4 text-center text-[18px] font-bold tracking-[-0.4px] text-black transition-colors duration-300 group-hover:text-[#F58233]">
+                  <h3 className="mt-4 text-base font-bold text-[#111827] transition-colors group-hover:text-[#F97316]">
                     {city.name}
                   </h3>
 
-                  {/* LISTINGS */}
-                  <p className="mt-1 text-[13px] font-medium text-neutral-500">
-                    {city.listings}
-                  </p>
+                  <p className="mt-1 text-sm text-[#6B7280]">{city.listings}</p>
                 </div>
               </Link>
-            ))}
-          </div>
+            </motion.div>
+          ))}
+        </div>
 
-          {/* MOBILE BUTTON */}
-          <div className="mt-10 flex justify-center md:hidden">
-            <Link
-              href="/cities"
-              className="flex items-center gap-2 rounded-xl border border-[#F58233] px-6 py-3 text-[15px] font-semibold text-[#F58233]"
-            >
-              View All
-              <ChevronRight size={16} />
-            </Link>
-          </div>
+        <div className="mt-10 flex justify-center md:hidden">
+          <Link
+            href="/cities"
+            className="rounded-2xl border border-[#F97316] px-6 py-3 text-sm font-semibold text-[#F97316]"
+          >
+            View All Cities
+          </Link>
         </div>
       </div>
     </section>

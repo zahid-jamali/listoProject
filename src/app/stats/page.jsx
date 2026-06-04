@@ -64,7 +64,7 @@ export default function StatsPage() {
     <main className="bg-[#f6f6f6] min-h-screen py-8 mt-20 ">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div className="mb-8">
-          <h1 className="text-xl font-semibold text-[#111827] mb-4">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-[#111827] mb-4">
             Real Estate Trends & Stats
           </h1>
 

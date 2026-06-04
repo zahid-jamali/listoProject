@@ -1,402 +1,287 @@
 // app/buildings/[slug]/page.jsx
-
 "use client";
 
-import { useEffect, useState } from "react";
-import { ChevronDown, BedDouble, Bath } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from "recharts";
+import { BedDouble, Bath, Phone, Mail } from "lucide-react";
 
 export default function BuildingPage() {
-  const params = useParams();
-  const slug = params.slug;
+  const { slug } = useParams();
 
+  const [loading, setLoading] = useState(true);
   const [building, setBuilding] = useState(null);
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState([]);
   const [monthly, setMonthly] = useState([]);
   const [chart, setChart] = useState([]);
 
   useEffect(() => {
-    fetchData();
+    if (!slug) return;
+
+    const load = async () => {
+      try {
+        setLoading(true);
+
+        const buildingRes = await fetch(
+          `/api/building?addr_slug=${slug}&s_r=Lease&limit=12`
+        );
+        const buildingData = await buildingRes.json();
+
+        const summary = buildingData?.summary;
+
+        const [statsRes, chartRes, monthlyRes] = await Promise.all([
+          fetch(`/api/building/stats?addr_slug=${slug}&s_r=Lease`),
+          fetch(`/api/building/sold-chart?addr_slug=${slug}&s_r=Sale`),
+          fetch(
+            `/api/building/sold-monthly?addr=${encodeURIComponent(
+              summary?.addr || ""
+            )}&s_r=Sale`
+          ),
+        ]);
+
+        setBuilding(buildingData);
+        setStats(await statsRes.json());
+        setChart(await chartRes.json());
+        setMonthly(await monthlyRes.json());
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
   }, [slug]);
 
-  const fetchData = async () => {
-    try {
-      const [buildingRes, statsRes, monthlyRes, chartRes] = await Promise.all([
-        fetch(`/api/buildings/${slug}`),
-        fetch(`/api/buildings/${slug}/stats`),
-        fetch(`/api/buildings/${slug}/monthly`),
-        fetch(`/api/buildings/${slug}/chart`),
-      ]);
+  const getImageUrl = (url) => {
+    if (!url) return "/assets/buildings.png";
 
-      const buildingData = await buildingRes.json();
-      const statsData = await statsRes.json();
-      const monthlyData = await monthlyRes.json();
-      const chartData = await chartRes.json();
+    const trrebIndex = url.indexOf("https://trreb-image");
 
-      setBuilding(buildingData);
-      setStats(statsData);
-      setMonthly(monthlyData?.rows || []);
-      setChart(chartData?.rows || []);
-    } catch (error) {
-      console.log(error);
+    if (trrebIndex !== -1) {
+      return url.substring(trrebIndex);
     }
+
+    return url;
   };
 
-  if (!building) {
+  const chartData = useMemo(
+    () =>
+      (chart || []).map((item) => ({
+        month: new Date(item.date).toLocaleDateString("en-CA", {
+          month: "short",
+          year: "2-digit",
+        }),
+        price: Number(item.br1 || item.br2 || item.br3 || item.br4 || 0),
+      })),
+    [chart]
+  );
+
+  if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f5f5f5]">
-        <div className="h-16 w-16 animate-spin rounded-full border-4 border-[#F36B22] border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
       </div>
     );
   }
 
+  const summary = building?.summary;
+  const listings = building?.rows || [];
+
   return (
-    <main className="min-h-screen bg-[#f5f5f5] py-10">
-      <div className="mx-auto max-w-[1400px] px-4 lg:px-8">
-        {/* HERO */}
-        <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_10px_35px_rgba(0,0,0,0.08)]">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px]">
-            {/* IMAGE */}
-            <div className="relative h-[340px] overflow-hidden">
+    <main className="min-h-screen bg-slate-50">
+      <section className="relative overflow-hidden bg-[#081A3A]">
+        {/* Background */}
+        <div className="absolute inset-0 overflow-hidden">
+          <img
+            src={listings?.[0]?.photos?.[0] || listings?.[0]?.thumbnail}
+            alt=""
+            className="h-full w-full object-cover blur-3xl scale-125 opacity-30"
+          />
+
+          <div className="absolute inset-0 bg-gradient-to-b from-[#081A3A]/40 via-[#081A3A]/60 to-[#081A3A]" />
+        </div>
+
+        <div className="relative mx-auto max-w-7xl px-6 py-16 lg:px-10">
+          <div className="grid gap-10 lg:grid-cols-[520px_1fr] lg:items-center">
+            {/* Actual Image */}
+            <div className="overflow-hidden rounded-[32px] border border-white/10 bg-white/5 shadow-[0_30px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl">
               <img
-                src={
-                  building?.thumbnail ||
-                  "https://listo.ca/images/placeholder/building.jpg"
-                }
-                alt={building?.addr}
-                className="h-full w-full object-cover"
+                src={listings?.[0]?.photos?.[0] || listings?.[0]?.thumbnail}
+                alt={summary?.addr}
+                className="w-full object-contain bg-[#0F172A]"
               />
-
-              {/* OVERLAY */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-              {/* TITLE */}
-              <div className="absolute bottom-7 left-7">
-                <h1 className="max-w-[700px] text-[34px] font-black leading-tight tracking-[-0.04em] text-white lg:text-[42px]">
-                  {building?.addr}
-                </h1>
-
-                <p className="mt-2 text-sm text-white/70">Toronto, Ontario</p>
-              </div>
             </div>
 
-            {/* RIGHT STATS */}
-            <div className="space-y-4 bg-[#fafafa] p-5">
-              {/* LEASE */}
-              <div className="rounded-[18px] border border-neutral-200 bg-white p-5 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-neutral-500">
-                  Leases
-                </p>
-
-                <div className="mt-4 flex items-end justify-between">
-                  <div>
-                    <h3 className="text-[34px] font-black text-[#0B132B]">
-                      $2.4M
-                    </h3>
-
-                    <p className="text-xs text-neutral-500">Avg Lease Price</p>
-                  </div>
-
-                  <div className="text-right">
-                    <h4 className="text-2xl font-black text-[#F36B22]">99</h4>
-
-                    <p className="text-xs text-neutral-500">Listings</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* SALES */}
-              <div className="rounded-[18px] border border-neutral-200 bg-white p-5 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-neutral-500">
-                  Sales
-                </p>
-
-                <div className="mt-4 flex items-end justify-between">
-                  <div>
-                    <h3 className="text-[34px] font-black text-[#0B132B]">
-                      $850K
-                    </h3>
-
-                    <p className="text-xs text-neutral-500">Avg Sale Price</p>
-                  </div>
-
-                  <div className="text-right">
-                    <h4 className="text-2xl font-black text-[#F36B22]">45</h4>
-
-                    <p className="text-xs text-neutral-500">Listings</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* TABLES */}
-        <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
-          {/* LEASE TABLE */}
-          <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
-            {/* HEADER */}
-            <div className="border-b border-neutral-200 px-6 py-5">
-              <h2 className="text-[28px] font-black text-[#0B132B]">
-                Properties for Lease
-              </h2>
-            </div>
-
-            {/* TABLE */}
-            <div className="p-6">
-              <table className="w-full overflow-hidden rounded-xl">
-                <thead className="bg-[#07152E] text-white">
-                  <tr>
-                    <th className="px-5 py-4 text-left text-sm font-black">
-                      Bedrooms
-                    </th>
-
-                    <th className="px-5 py-4 text-left text-sm font-black">
-                      Listings
-                    </th>
-
-                    <th className="px-5 py-4 text-left text-sm font-black">
-                      Avg Price
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {[1, 2, 3, 4].map((item) => (
-                    <tr key={item} className="border-b border-neutral-100">
-                      <td className="px-5 py-4 text-sm font-semibold text-neutral-700">
-                        Studio
-                      </td>
-
-                      <td className="px-5 py-4 text-sm font-semibold text-neutral-700">
-                        7
-                      </td>
-
-                      <td className="px-5 py-4 text-sm font-black text-[#F36B22]">
-                        $2,900 / Mo.
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {/* BUTTON */}
-              <div className="mt-6 flex justify-center">
-                <button className="rounded-full bg-gradient-to-r from-[#F36B22] to-[#ff8c4d] px-6 py-2 text-xs font-black uppercase tracking-[0.12em] text-white">
-                  View More Details →
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* SALE TABLE */}
-          <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
-            {/* HEADER */}
-            <div className="border-b border-neutral-200 px-6 py-5">
-              <h2 className="text-[28px] font-black text-[#0B132B]">
-                Properties for Sale
-              </h2>
-            </div>
-
-            {/* TABLE */}
-            <div className="p-6">
-              <table className="w-full overflow-hidden rounded-xl">
-                <thead className="bg-[#07152E] text-white">
-                  <tr>
-                    <th className="px-5 py-4 text-left text-sm font-black">
-                      Bedrooms
-                    </th>
-
-                    <th className="px-5 py-4 text-left text-sm font-black">
-                      Listings
-                    </th>
-
-                    <th className="px-5 py-4 text-left text-sm font-black">
-                      Avg Price
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {[1, 2, 3, 4].map((item) => (
-                    <tr key={item} className="border-b border-neutral-100">
-                      <td className="px-5 py-4 text-sm font-semibold text-neutral-700">
-                        2
-                      </td>
-
-                      <td className="px-5 py-4 text-sm font-semibold text-neutral-700">
-                        8
-                      </td>
-
-                      <td className="px-5 py-4 text-sm font-black text-[#F36B22]">
-                        $780K
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {/* BUTTON */}
-              <div className="mt-6 flex justify-center">
-                <button className="rounded-full bg-gradient-to-r from-[#F36B22] to-[#ff8c4d] px-6 py-2 text-xs font-black uppercase tracking-[0.12em] text-white">
-                  View More Details →
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* CHART */}
-        <div className="mt-10 rounded-[24px] bg-white p-8 shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
-          {/* HEADER */}
-          <div className="mb-8 flex items-center justify-between">
+            {/* Content */}
             <div>
-              <h2 className="text-[30px] font-black text-[#0B132B]">
-                Price By Bedrooms
-              </h2>
+              <div className="inline-flex rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur-xl">
+                Premium Condo Building
+              </div>
 
-              <p className="mt-2 text-sm text-neutral-500">
-                Average pricing per bedroom over time
+              <h1 className="mt-6 text-4xl font-black leading-tight text-white lg:text-6xl">
+                {summary?.addr}
+              </h1>
+
+              <p className="mt-4 text-lg text-white/75">
+                {summary?.munc_slug?.replace(/-/g, " ")} •{" "}
+                {summary?.county?.toUpperCase()}
               </p>
+
+              <div className="mt-8 grid grid-cols-3 gap-4">
+                <div className="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur-xl">
+                  <p className="text-xs uppercase tracking-wider text-white/60">
+                    Total
+                  </p>
+                  <h3 className="mt-2 text-3xl font-black text-white">
+                    {summary?.count_total}
+                  </h3>
+                </div>
+
+                <div className="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur-xl">
+                  <p className="text-xs uppercase tracking-wider text-white/60">
+                    Lease
+                  </p>
+                  <h3 className="mt-2 text-3xl font-black text-white">
+                    {summary?.count_lease}
+                  </h3>
+                </div>
+
+                <div className="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur-xl">
+                  <p className="text-xs uppercase tracking-wider text-white/60">
+                    Sale
+                  </p>
+                  <h3 className="mt-2 text-3xl font-black text-white">
+                    {summary?.count_sale}
+                  </h3>
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            <div className="flex items-center gap-2">
-              <button className="rounded-full bg-[#F36B22] px-4 py-2 text-xs font-black uppercase text-white">
-                Sale
-              </button>
+      <div className="mx-auto max-w-7xl px-4 py-10">
+        <div className="grid gap-6 md:grid-cols-4">
+          <Card title="Total Listings" value={summary?.count_total} />
+          <Card title="For Lease" value={summary?.count_lease} />
+          <Card title="For Sale" value={summary?.count_sale} />
+          <Card title="Units Found" value={building?.total} />
+        </div>
 
-              <button className="rounded-full border border-neutral-200 px-4 py-2 text-xs font-black uppercase text-neutral-700">
-                Lease
-              </button>
+        <div className="mt-8 grid gap-8 lg:grid-cols-3">
+          <div className="lg:col-span-2 rounded-3xl bg-white p-6 shadow-sm">
+            <h2 className="mb-6 text-2xl font-bold">Sold Price Trend</h2>
+
+            <div className="h-[350px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="price" strokeWidth={3} />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
-          {/* GRAPH */}
-          <div className="relative h-[320px] overflow-hidden rounded-[20px] border border-neutral-200 bg-gradient-to-b from-[#fff7f2] to-white p-8">
-            {/* LINES */}
-            <div className="absolute inset-0 flex flex-col justify-between p-8">
-              {[1, 2, 3, 4, 5].map((item) => (
-                <div
-                  key={item}
-                  className="border-t border-dashed border-neutral-200"
+          <div className="rounded-3xl bg-white p-6 shadow-sm">
+            <h2 className="text-2xl font-bold">Agent</h2>
+
+            <div className="mt-6 flex items-center gap-4">
+              <img
+                src={`https://listo.ca/${summary?.agent?.thumbnail}`}
+                className="h-16 w-16 rounded-full"
+                alt="agent"
+              />
+              <div>
+                <h3 className="font-bold">{summary?.agent?.name}</h3>
+                <div className="mt-2 flex items-center gap-2 text-sm">
+                  <Phone size={14} />
+                  {summary?.agent?.phone}
+                </div>
+                <div className="mt-1 flex items-center gap-2 text-sm">
+                  <Mail size={14} />
+                  {summary?.agent?.email}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-10 rounded-3xl bg-white p-6 shadow-sm">
+          <h2 className="mb-6 text-2xl font-bold">Available Listings</h2>
+
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {listings.map((item) => (
+              <a key={item.id} className="overflow-hidden rounded-3xl border">
+                <img
+                  src={getImageUrl(item.thumbnail)}
+                  alt={item.title}
+                  className="h-56 w-full object-cover"
                 />
-              ))}
-            </div>
 
-            {/* GRAPH LINE */}
-            <svg
-              className="absolute inset-0 h-full w-full"
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
-            >
-              <polyline
-                fill="none"
-                stroke="#F36B22"
-                strokeWidth="0.8"
-                points="
-                  5,80
-                  15,75
-                  25,78
-                  35,65
-                  45,68
-                  55,52
-                  65,45
-                  75,48
-                  85,25
-                  95,15
-                "
-              />
+                <div className="p-5">
+                  <h3 className="line-clamp-2 font-bold">{item.title}</h3>
 
-              <circle cx="85" cy="25" r="1.8" fill="#111" />
-            </svg>
+                  <p className="mt-3 text-2xl font-black text-orange-600">
+                    {item.lp_dol_text}
+                  </p>
 
-            {/* TOOLTIP */}
-            <div className="absolute right-[80px] top-[90px] rounded-lg bg-black px-3 py-2 text-xs font-bold text-white shadow-xl">
-              $1.2M
-            </div>
+                  <div className="mt-4 flex gap-4 text-sm">
+                    <span className="flex items-center gap-1">
+                      <BedDouble size={16} />
+                      {item.br}
+                    </span>
+
+                    <span className="flex items-center gap-1">
+                      <Bath size={16} />
+                      {item.bath_tot}
+                    </span>
+                  </div>
+
+                  <p className="mt-3 text-sm text-slate-500">{item.sqft}</p>
+                </div>
+              </a>
+            ))}
           </div>
         </div>
 
-        {/* RECENT */}
-        <div className="mt-10 rounded-[24px] bg-white p-8 shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
-          {/* HEADER */}
-          <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <h2 className="text-[30px] font-black text-[#0B132B]">
-                Recent Sold/Leased
-              </h2>
+        <div className="mt-10 rounded-3xl bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-2xl font-bold">Building Statistics</h2>
 
-              <p className="mt-2 text-sm text-neutral-500">
-                at {building?.addr}
-              </p>
-            </div>
-
-            {/* FILTERS */}
-            <div className="flex items-center gap-3">
-              <button className="rounded-full border border-neutral-200 px-5 py-2 text-xs font-black uppercase text-neutral-700">
-                Sold
-              </button>
-
-              <button className="rounded-full bg-[#F36B22] px-5 py-2 text-xs font-black uppercase text-white">
-                Leased
-              </button>
-
-              <button className="rounded-full border border-neutral-200 px-5 py-2 text-xs font-black uppercase text-neutral-700">
-                Everything
-              </button>
-            </div>
-          </div>
-
-          {/* LIST */}
-          <div className="space-y-4">
-            {monthly.length > 0
-              ? monthly.map((item, index) => (
-                  <div
-                    key={index}
-                    className="rounded-[18px] bg-[#07152E] p-5 text-white shadow-lg"
-                  >
-                    <div className="flex items-center justify-between">
-                      {/* LEFT */}
-                      <div>
-                        <h3 className="text-lg font-black">
-                          {item.addr || "Unit 1205"}
-                        </h3>
-
-                        <p className="mt-2 text-sm text-neutral-300">
-                          {item.lp_dol_text || "$899,000"}
-                        </p>
-                      </div>
-
-                      {/* BADGE */}
-                      <div className="rounded-full bg-[#F36B22] px-4 py-2 text-xs font-black uppercase tracking-[0.12em]">
-                        Leased
-                      </div>
-                    </div>
-                  </div>
-                ))
-              : [1, 2, 3, 4].map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-[18px] bg-[#07152E] p-5 text-white shadow-lg"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-lg font-black">Unit 1205</h3>
-
-                        <p className="mt-2 text-sm text-neutral-300">
-                          $899,000
-                        </p>
-                      </div>
-
-                      <div className="rounded-full bg-[#F36B22] px-4 py-2 text-xs font-black uppercase tracking-[0.12em]">
-                        Leased
-                      </div>
-                    </div>
-                  </div>
-                ))}
+          <div className="grid gap-4 md:grid-cols-2">
+            {(stats || []).map((s, i) => (
+              <div key={i} className="rounded-2xl border p-5">
+                <div
+                  className="text-3xl font-black"
+                  dangerouslySetInnerHTML={{ __html: s.num }}
+                />
+                <div
+                  className="mt-2 text-sm text-slate-500"
+                  dangerouslySetInnerHTML={{ __html: s.text }}
+                />
+              </div>
+            ))}
           </div>
         </div>
       </div>
     </main>
+  );
+}
+
+function Card({ title, value }) {
+  return (
+    <div className="rounded-3xl bg-white p-6 shadow-sm">
+      <p className="text-sm text-slate-500">{title}</p>
+      <h3 className="mt-2 text-3xl font-black">{value || 0}</h3>
+    </div>
   );
 }

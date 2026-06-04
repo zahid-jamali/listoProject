@@ -1,4 +1,17 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { ArrowRight, MapPin } from "lucide-react";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay: i * 0.08 },
+  }),
+};
 
 export default function PreConstructionSection() {
   const projects = [
@@ -67,194 +80,163 @@ export default function PreConstructionSection() {
 
   const features = [
     {
-      title: "Lower entry prices",
-      desc: "Lock in current market value and benefit from appreciation before the doors even open.",
+      title: "Lower Entry Prices",
+      desc: "Secure inventory before market delivery and benefit from future appreciation.",
       icon: "/assets/icons/pc-1.png",
     },
     {
-      title: "Flexible plans",
-      desc: "Spread your deposit over several years with manageable, structured payment installments.",
+      title: "Flexible Plans",
+      desc: "Structured deposit schedules designed to reduce upfront investment pressure.",
       icon: "/assets/icons/pc-2.png",
     },
     {
-      title: "High ROI",
-      desc: "Historically outperform traditional listings through rapid equity growth during construction.",
+      title: "High ROI Potential",
+      desc: "Historically strong equity growth during development and completion phases.",
       icon: "/assets/icons/pc-3.png",
     },
     {
-      title: "Brand new",
-      desc: "Receive a turnkey property with full warranties, modern standards, and zero maintenance costs.",
+      title: "Brand New Homes",
+      desc: "Modern finishes, warranties and lower maintenance costs from day one.",
       icon: "/assets/icons/pc-4.png",
     },
   ];
 
   return (
-    <section className="w-full bg-[#f5f5f5] py-16 lg:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* HEADER */}
-        <div className="mb-8 flex flex-col gap-5">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full  shadow-sm">
-                <img
-                  src="/assets/icons/pc-headings.png"
-                  className="rounded-4xl"
-                />
-              </div>
+    <section className="bg-[#F7F8FA] py-20 lg:py-24">
+      <div className="mx-auto max-w-7xl px-6 lg:px-10">
+        <div className="text-center">
+          <span className="inline-flex rounded-full border border-[#FED7AA] bg-[#FFF7ED] px-4 py-2 text-sm font-medium text-[#F97316]">
+            Platinum Access Projects
+          </span>
 
-              <div>
-                <h2 className="text-[28px] font-bold tracking-[-0.03em] text-[#111827] sm:text-[34px]">
-                  Pre-Construction Projects
-                </h2>
-              </div>
-            </div>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl">
+            Pre‑Construction Projects
+          </h2>
 
-            {/* <button className="rounded-full border border-[#d6d6d6] bg-white px-4 py-2 text-xs font-semibold tracking-wide text-[#4b5563] shadow-sm transition-all duration-300 hover:border-[#ff6b2c] hover:text-[#ff6b2c]">
-              Map
-            </button> */}
-          </div>
-
-          <div className="max-w-5xl rounded-2xl border border-[#dcdcdc] bg-white px-6 py-5 shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
-            <p className="text-sm leading-7 text-[#4b5563]  sm:text-[15px]">
-              Discover a curated portfolio of pre-construction opportunities on
-              Listo, where we collaborate directly with developers to offer
-              exclusive access to high-growth investment projects. Gain market
-              insights, premium inventory, and early-stage pricing advantages
-              designed for modern real estate investors.
-            </p>
-          </div>
+          <p className="mx-auto mt-4 max-w-3xl text-sm leading-7 text-[#6B7280] sm:text-base">
+            Discover exclusive developer inventory, early pricing advantages and
+            high-growth investment opportunities across leading markets.
+          </p>
         </div>
 
-        {/* PROJECT GRID */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-14 grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
           {projects.map((project, index) => (
-            <Link href={`/preconstruction/${project.href}`}>
-              <div
-                key={index}
-                className="group overflow-hidden rounded-[24px] border border-[#d9d9d9] bg-white shadow-[0_12px_35px_rgba(15,23,42,0.08)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_18px_50px_rgba(15,23,42,0.14)]"
-              >
-                <div className="relative h-[250px] overflow-hidden">
-                  <img
-                    src={project.image}
-                    alt={project.city}
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
+            <motion.div
+              key={project.city}
+              custom={index}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeUp}
+              whileHover={{ y: -6 }}
+            >
+              <Link href={`/preconstruction/${project.href}`}>
+                <div className="overflow-hidden rounded-[32px] border border-[#E5E7EB] bg-white shadow-[0_10px_35px_rgba(0,0,0,0.05)] hover:shadow-[0_25px_60px_rgba(0,0,0,0.10)]">
+                  <div className="relative h-[260px] overflow-hidden">
+                    <img
+                      src={project.image}
+                      alt={project.city}
+                      className="h-full w-full object-cover transition duration-700 hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                  </div>
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/90 via-[#020617]/20 to-transparent" />
-                </div>
-
-                <div className="bg-[#04122b] px-5 py-5 text-white">
-                  <div className="mb-5">
-                    <h3 className="text-[26px] font-bold tracking-[-0.03em]">
+                  <div className="p-6">
+                    <h3 className="text-2xl font-bold text-[#111827]">
                       {project.city}
                     </h3>
 
-                    <div className="mt-2 flex items-start gap-2 text-[13px] text-[#cbd5e1]">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.8}
-                        stroke="currentColor"
-                        className="mt-[1px] h-4 w-4 flex-shrink-0"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
-                        />
-                      </svg>
-
-                      <span className="leading-5">{project.address}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between border-t border-white/10 pt-4">
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#94a3b8]">
-                        Starting From
-                      </p>
-                      <p className="mt-1 text-lg font-bold text-[#ff7b3d]">
-                        {project.price}
+                    <div className="mt-3 flex items-start gap-2">
+                      <MapPin size={16} className="mt-1 text-[#9CA3AF]" />
+                      <p className="text-sm leading-6 text-[#6B7280]">
+                        {project.address}
                       </p>
                     </div>
 
-                    <div className="text-right">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#94a3b8]">
-                        Completion
-                      </p>
-                      <p className="mt-1 text-lg font-bold text-white">
-                        {project.completion}
-                      </p>
+                    <div className="mt-6 flex items-center justify-between border-t border-[#F3F4F6] pt-5">
+                      <div>
+                        <p className="text-xs uppercase tracking-wider text-[#9CA3AF]">
+                          Starting From
+                        </p>
+                        <p className="mt-1 text-lg font-bold text-[#F97316]">
+                          {project.price}
+                        </p>
+                      </div>
+
+                      <div className="text-right">
+                        <p className="text-xs uppercase tracking-wider text-[#9CA3AF]">
+                          Completion
+                        </p>
+                        <p className="mt-1 text-lg font-bold text-[#111827]">
+                          {project.completion}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </Link>
+              </Link>
+            </motion.div>
           ))}
         </div>
 
-        {/* BUTTON */}
-        <div className="mt-10 flex justify-center">
-          <button className="rounded-full bg-[#ff6b2c] px-7 py-3 text-sm font-semibold tracking-wide text-white shadow-[0_12px_25px_rgba(255,107,44,0.35)] transition-all duration-300 hover:scale-[1.03] hover:bg-[#ff5a14]">
-            Browse by Developer →
+        <div className="mt-12 flex justify-center">
+          <button className="rounded-2xl bg-[#081A3A] px-7 py-3 text-sm font-semibold text-white hover:bg-[#102752]">
+            Browse by Developer
           </button>
         </div>
       </div>
 
-      {/* STATS SECTION */}
-      <div className="mt-20 bg-[#ececec] py-14">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-y-10 px-4 text-center md:grid-cols-4">
-          {stats.map((item, index) => (
-            <div key={index}>
-              <h3 className="text-4xl font-extrabold tracking-[-0.04em] text-[#0f172a] sm:text-5xl">
+      <div className="mt-20 bg-white py-16">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-6 text-center md:grid-cols-4">
+          {stats.map((item) => (
+            <div key={item.label}>
+              <h3 className="text-4xl font-bold text-[#111827]">
                 {item.value}
               </h3>
-
-              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.24em] text-[#6b7280]">
-                {item.label}
-              </p>
+              <p className="mt-2 text-sm text-[#6B7280]">{item.label}</p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* WHY INVEST */}
-      <div className="mx-auto mt-20 max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto mt-20 max-w-7xl px-6 lg:px-10">
         <div className="text-center">
-          <h2 className="text-[34px] font-bold tracking-[-0.04em] text-[#111827]">
-            Why Invest in Pre-Construction?
+          <h2 className="text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl">
+            Why Invest In Pre‑Construction?
           </h2>
-
-          <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-7 text-[#6b7280]">
-            Secure your future with the most strategic real estate acquisition
-            model available today.
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#6B7280] sm:text-base">
+            A smarter way to build long‑term wealth through real estate.
           </p>
         </div>
 
-        <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-14 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           {features.map((feature, index) => (
-            <div
-              key={index}
-              className="rounded-[24px] bg-[#03112b] p-8 text-center shadow-[0_15px_40px_rgba(2,6,23,0.15)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_55px_rgba(2,6,23,0.2)]"
+            <motion.div
+              key={feature.title}
+              custom={index}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeUp}
+              whileHover={{ y: -6 }}
+              className="rounded-[32px] border border-[#E5E7EB] bg-white p-8 text-center shadow-[0_10px_35px_rgba(0,0,0,0.05)]"
             >
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#ff6b2c] text-xl font-bold text-white shadow-lg shadow-[#ff6b2c]/30">
-                <img src={feature.icon} />
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#e9ad4b]">
+                <img
+                  src={feature.icon}
+                  alt=""
+                  className="h-8 w-8 object-contain"
+                />
               </div>
 
-              <h3 className="mt-7 text-[22px] font-bold tracking-[-0.03em] text-white">
+              <h3 className="mt-6 text-xl font-bold text-[#111827]">
                 {feature.title}
               </h3>
 
-              <p className="mt-4 text-sm leading-7 text-[#cbd5e1]">
+              <p className="mt-4 text-sm leading-7 text-[#6B7280]">
                 {feature.desc}
               </p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

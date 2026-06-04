@@ -1,170 +1,149 @@
-// app/sell/page.jsx
+"use client";
+
+import { motion } from "framer-motion";
+import { ArrowRight, TrendingUp, Users, BadgeDollarSign } from "lucide-react";
+
+const reasons = [
+  {
+    title: "Expand Your Reach",
+    description:
+      "Reach more qualified buyers through LISTO's growing ecosystem of resale, pre-construction and investor traffic.",
+    icon: Users,
+  },
+  {
+    title: "Trusted Local Experts",
+    description:
+      "Work with experienced agents who understand pricing strategy, negotiation and market positioning.",
+    icon: TrendingUp,
+  },
+  {
+    title: "Lower Fees, Higher Returns",
+    description:
+      "Maximize your sale price while reducing unnecessary brokerage expenses and marketing costs.",
+    icon: BadgeDollarSign,
+  },
+];
 
 export default function SellPage() {
-  const reasons = [
-    {
-      title: "Expand Your Reach To More Potential Buyers",
-      description:
-        "Listo is rapidly expanding, offering a unique advantage by seamlessly integrating resale and pre-construction listings, enabling you to connect with a diverse pool of potential buyers.",
-      icon: "👍",
-      dark: true,
-    },
-    {
-      title: "Trusted Local Agents",
-      description:
-        "Listo agents are here to support you every step of the way, from expert pricing and marketing your home to assisting on moving day.",
-      image:
-        "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1200&auto=format&fit=crop",
-    },
-    {
-      title: "Prominent Placement",
-      description:
-        "Secure prime visibility on Listo.ca, ensuring your home grabs attention from our vast network of account holders.",
-      icon: "♡",
-      dark: true,
-    },
-  ];
-
   return (
-    <div className="container mx-auto mt-4">
-      <main className="min-h-screen bg-[#f5f5f5]">
-        {/* HERO */}
-        <section className="py-20">
-          <div className="mx-auto grid max-w-[1450px] grid-cols-1 items-center gap-14 px-4 lg:grid-cols-2 lg:px-8">
-            {/* LEFT */}
-            <div>
-              {/* TITLE */}
-              <h1 className="text-[52px] font-black tracking-[-0.05em] text-[#F36B22] lg:text-[64px]">
-                Sell with Listo!
+    <main className="min-h-screen bg-[#F7F8FA]">
+      <section className="relative overflow-hidden bg-[#081A3A]">
+        {/* Background Effects */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute left-[-100px] top-[-100px] h-[280px] w-[280px] sm:h-[400px] sm:w-[400px] rounded-full bg-[#F97316]/20 blur-[120px]" />
+          <div className="absolute right-[-100px] top-[50px] h-[280px] w-[280px] sm:h-[400px] sm:w-[400px] rounded-full bg-blue-500/20 blur-[120px]" />
+        </div>
+
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 py-14 sm:py-20 lg:py-28">
+          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+            {/* Content */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center lg:text-left"
+            >
+              <span className="inline-flex rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs sm:text-sm font-medium text-white backdrop-blur-md">
+                Sell With Confidence
+              </span>
+
+              <h1 className="mt-5 font-bold tracking-tight text-white text-2xl sm:text-3xl md:text-5xl leading-tight">
+                Sell With
+                <span className="block text-[#F97316]">LISTO</span>
               </h1>
 
-              {/* SUBTITLE */}
-              <h2 className="mt-5 max-w-[650px] text-[34px] font-black leading-tight tracking-[-0.04em] text-[#0B132B] lg:text-[46px]">
-                Maximize Profits and Minimize Expenses.
-              </h2>
+              <p className="mx-auto mt-5 max-w-xl text-sm sm:text-base leading-7 sm:leading-8 text-white/75 lg:mx-0">
+                Maximize your property's value with expert pricing, premium
+                marketing and a modern selling experience designed to reduce
+                fees and increase exposure.
+              </p>
 
-              {/* TEXT */}
-              <div className="mt-8 max-w-[620px] space-y-5">
-                <p className="text-[17px] leading-8 text-neutral-600">
-                  Maximize your home’s selling price while saving significantly
-                  on fees.
-                </p>
-
-                <p className="text-[17px] leading-8 text-neutral-600">
-                  Benefit from our agents’ expertise in pricing, marketing, and
-                  selling your home at its highest value, all while paying a
-                  fraction of the fee typically charged by other brokerages.
-                </p>
-              </div>
-
-              {/* BUTTONS */}
-              <div className="mt-10 flex flex-wrap items-center gap-4">
-                <button className="rounded-full bg-gradient-to-r from-[#F36B22] to-[#ff8c4d] px-8 py-4 text-sm font-black uppercase tracking-[0.12em] text-white shadow-[0_12px_30px_rgba(243,107,34,0.35)] transition-all duration-300 hover:scale-105">
-                  Start Selling →
+              <div className="mt-8 flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
+                <button className="rounded-2xl bg-[#F97316] px-6 sm:px-7 py-3.5 sm:py-4 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-1">
+                  Start Selling
                 </button>
 
-                <button className="rounded-full border border-neutral-300 bg-white px-8 py-4 text-sm font-black uppercase tracking-[0.12em] text-[#0B132B] transition-all duration-300 hover:border-[#F36B22] hover:text-[#F36B22]">
+                <button className="rounded-2xl border border-white/15 bg-white/10 px-6 sm:px-7 py-3.5 sm:py-4 text-sm font-semibold text-white backdrop-blur-md">
                   Learn More
                 </button>
               </div>
-            </div>
+            </motion.div>
 
-            {/* RIGHT IMAGE */}
-            <div className="relative overflow-hidden rounded-[32px] shadow-[0_20px_60px_rgba(0,0,0,0.12)]">
-              {/* YOU WILL SET IMAGE */}
+            {/* Image */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="overflow-hidden rounded-[24px] sm:rounded-[32px] border border-white/10 bg-white/5 shadow-[0_30px_80px_rgba(0,0,0,0.25)] backdrop-blur-xl"
+            >
               <img
                 src="/assets/sold.png"
                 alt="Sell With Listo"
-                className="h-[500px] w-full object-cover"
+                className="
+            w-full
+            h-[260px]
+            sm:h-[380px]
+            md:h-[450px]
+            lg:h-[520px]
+            object-cover
+          "
               />
-
-              {/* OVERLAY */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-            </div>
+            </motion.div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* REASONS */}
-        <section className="pb-24">
-          <div className="mx-auto max-w-[1450px] px-4 lg:px-8">
-            {/* HEADING */}
-            <div className="mb-12">
-              <h2 className="text-[42px] font-black tracking-[-0.05em] text-[#0B132B] lg:text-[54px]">
-                3 Reasons To Sell With Listo
-              </h2>
+      <section className="py-20 lg:py-24">
+        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+          <div className="text-center">
+            <span className="inline-flex rounded-full border border-[#FED7AA] bg-[#FFF7ED] px-4 py-2 text-sm font-medium text-[#F97316]">
+              Why Choose LISTO
+            </span>
 
-              <p className="mt-4 max-w-[700px] text-[17px] leading-8 text-neutral-600">
-                Discover how Listo helps homeowners sell faster, smarter, and
-                with maximum visibility.
-              </p>
-            </div>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl">
+              3 Reasons To Sell With LISTO
+            </h2>
 
-            {/* CARDS */}
-            <div className="grid grid-cols-1 gap-7 lg:grid-cols-3">
-              {reasons.map((reason, index) => (
-                <div
-                  key={index}
-                  className={`group relative overflow-hidden rounded-[30px] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_25px_60px_rgba(0,0,0,0.16)] ${
-                    reason.dark ? "bg-[#04122B]" : "bg-white"
-                  }`}
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#6B7280] sm:text-base">
+              A modern real-estate platform built to help sellers achieve better
+              results with less friction.
+            </p>
+          </div>
+
+          <div className="mt-14 grid gap-6 lg:grid-cols-3">
+            {reasons.map((reason, index) => {
+              const Icon = reason.icon;
+
+              return (
+                <motion.div
+                  key={reason.title}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -8 }}
+                  className="rounded-[32px] border border-[#E5E7EB] bg-white p-8 shadow-[0_10px_35px_rgba(0,0,0,0.05)]"
                 >
-                  {/* IMAGE CARD */}
-                  {reason.image ? (
-                    <>
-                      <img
-                        src={reason.image}
-                        alt={reason.title}
-                        className="h-[500px] w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#FFF7ED]">
+                    <Icon className="text-[#F97316]" size={28} />
+                  </div>
 
-                      {/* OVERLAY */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+                  <h3 className="mt-6 text-2xl font-bold text-[#111827]">
+                    {reason.title}
+                  </h3>
 
-                      {/* CONTENT */}
-                      <div className="absolute bottom-0 left-0 right-0 p-8">
-                        <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-white/15 text-3xl text-white backdrop-blur-md">
-                          👥
-                        </div>
+                  <p className="mt-4 text-sm leading-7 text-[#6B7280]">
+                    {reason.description}
+                  </p>
 
-                        <h3 className="max-w-[300px] text-[34px] font-black leading-tight tracking-[-0.04em] text-white">
-                          {reason.title}
-                        </h3>
-
-                        <p className="mt-5 text-[15px] leading-7 text-white/80">
-                          {reason.description}
-                        </p>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex h-full min-h-[500px] flex-col justify-between p-8">
-                      {/* ICON */}
-                      <div className="flex h-20 w-20 items-center justify-center rounded-full border border-white/10 bg-white/5 text-5xl text-white backdrop-blur-sm">
-                        {reason.icon}
-                      </div>
-
-                      {/* CONTENT */}
-                      <div>
-                        <h3 className="max-w-[320px] text-[36px] font-black leading-tight tracking-[-0.05em] text-white">
-                          {reason.title}
-                        </h3>
-
-                        <p className="mt-6 text-[15px] leading-7 text-white/75">
-                          {reason.description}
-                        </p>
-
-                        {/* BUTTON */}
-                        <button className="mt-8 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-xs font-black uppercase tracking-[0.14em] text-white transition-all duration-300 hover:border-[#F36B22] hover:bg-[#F36B22]">
-                          Learn More →
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+                  <button className="mt-8 flex items-center gap-2 text-sm font-semibold text-[#081A3A]">
+                    Learn More
+                    <ArrowRight size={16} />
+                  </button>
+                </motion.div>
+              );
+            })}
           </div>
-        </section>
-      </main>
-    </div>
+        </div>
+      </section>
+    </main>
   );
 }

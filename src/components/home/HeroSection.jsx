@@ -1,80 +1,122 @@
-// src/components/home/HeroSection.tsx
-
 "use client";
 
+import { motion } from "framer-motion";
 import { Sparkles, Search } from "lucide-react";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: (delay = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.55,
+      delay,
+    },
+  }),
+};
 
 export default function HeroSection() {
   return (
-    <section className="relative h-[720px] w-full overflow-hidden">
-      {/* BACKGROUND IMAGE */}
-      <div
-        className="absolute inset-0 bg-cover bg-center "
+    <section className="relative min-h-[760px] overflow-hidden">
+      <motion.div
+        animate={{ scale: [1, 1.03, 1] }}
+        transition={{
+          duration: 20,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+        className="absolute inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: "url('/assets/hero.png')", // set your image path
+          backgroundImage: "url('/assets/hero.png')",
         }}
       />
 
-      {/* DARK OVERLAY */}
-      <div className="absolute inset-0 bg-black/45" />
+      <div className="absolute inset-0 bg-black/50" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/70" />
 
-      {/* 
-      
+      <div className="relative z-10 mx-auto flex min-h-[760px] max-w-7xl flex-col items-center justify-center px-6 text-center">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+          custom={0}
+          className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 backdrop-blur-md"
+        >
+          <Sparkles size={13} className="text-[#F97316]" />
+          <span className="text-xs font-medium tracking-wide text-white sm:text-sm">
+            AI Powered Real Estate Discovery
+          </span>
+        </motion.div>
 
+        <motion.h1
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+          custom={0.1}
+          className="max-w-4xl font-bold tracking-tight text-white text-2xl  sm:text-3xl md:text-5xl"
+        >
+          Find your next home in <span className="text-[#F97316]">Canada.</span>
+        </motion.h1>
 
-      {/* CONTENT */}
-      {/* <Navbar /> */}
-      <div className="relative z-10 mx-auto flex h-full max-w-[1440px] flex-col items-center justify-center px-6 text-center">
-        {/* HEADING */}
-        <h1 className="max-w-[900px] text-[44px] font-extrabold leading-[52px] tracking-[-1px] text-white lg:text-[44px] lg:leading-[74px]">
-          Find your next home in <span className="text-[#F58233]">Canada.</span>
-        </h1>
+        <motion.p
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+          custom={0.2}
+          className="mt-5 max-w-2xl text-sm leading-7 text-white/85 sm:text-base lg:text-lg"
+        >
+          Explore MLS listings, pre-construction opportunities, condos,
+          buildings and investment properties with intelligent search.
+        </motion.p>
 
-        {/* SUBTITLE */}
-        <p className="mt-4 text-[20px] font-medium text-white/90 lg:text-[22px]">
-          12,000+ MLS listings. Smarter search powered by AI.
-        </p>
-
-        {/* SEARCH CARD */}
-        <div className="mt-10 w-full max-w-[600px] rounded-[24px] bg-white p-2 shadow-2xl">
-          {/* TOP TABS */}
-          <div className="flex items-center justify-between">
-            {/* LEFT TABS */}
-            <div className="flex items-center gap-3">
-              <button className="rounded-full bg-[#F58233] px-5 py-2 text-sm font-semibold text-white">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+          custom={0.3}
+          className="mt-10 w-full max-w-[700px] rounded-[32px] border border-white/10 bg-white p-3 shadow-[0_20px_60px_rgba(0,0,0,0.22)]"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center rounded-full bg-[#F7F8FA] p-1">
+              <button className="rounded-full bg-[#F97316] px-4 py-2 text-xs font-semibold text-white sm:px-5 sm:text-sm">
                 Residential
               </button>
 
-              <button className="text-sm font-medium text-neutral-500 transition-colors hover:text-black">
+              <button className="px-4 py-2 text-xs font-medium text-[#6B7280] transition-colors hover:text-[#111827] sm:text-sm">
                 Commercial
               </button>
             </div>
 
-            {/* AI SEARCH */}
-            <button className="flex items-center gap-2 rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 transition-all hover:border-neutral-400">
-              <Sparkles size={15} className="text-[#F58233]" />
+            <motion.button
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center gap-2 rounded-full border border-[#FED7AA] bg-[#FFF7ED] px-3 py-2 text-xs font-semibold text-[#F97316] sm:px-4 sm:text-sm"
+            >
+              <Sparkles size={14} />
               AI Search
-            </button>
+            </motion.button>
           </div>
 
-          {/* SEARCH INPUT */}
-          <div className="mt-4 flex h-[56px] items-center rounded-xl border border-neutral-200 bg-white px-4 shadow-sm">
-            {/* SEARCH ICON */}
-            <Search size={18} className="text-neutral-400" />
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+            <div className="flex h-14 flex-1 items-center rounded-2xl border border-[#E5E7EB] px-4 transition-all focus-within:border-[#F97316]">
+              <Search size={18} className="text-[#9CA3AF]" />
 
-            {/* INPUT */}
-            <input
-              type="text"
-              placeholder="Search Home and Condos"
-              className="h-full flex-1 bg-transparent px-3 text-[15px] text-black placeholder:text-neutral-400 focus:outline-none"
-            />
+              <input
+                type="text"
+                placeholder="Search homes, condos, neighborhoods..."
+                className="w-full bg-transparent px-3 text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none"
+              />
+            </div>
 
-            {/* BUTTON */}
-            <button className="rounded-lg bg-[#F58233] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#e87420]">
+            <motion.button
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.98 }}
+              className="h-14 rounded-2xl bg-[#081A3A] px-6 text-sm font-semibold text-white transition-all hover:bg-[#102752]"
+            >
               Search
-            </button>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

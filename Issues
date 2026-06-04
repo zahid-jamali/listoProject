@@ -1,3 +1,7 @@
 No public api is available for Featured Listing, api/featured responses pre-construction information.
 No information for the cities, so I have hardcoded them.
 No information found for Nieghbourhood Experts section in the home page design, should I hardcode it.
+No information found for any indivitual data building so that I can get information to show stats of a single building
+I couldnt find any api for the Stats page of any city,
+No api found for what I can get, so I am going to hardcode it
+No api found for where I can get, also going to hard code it
