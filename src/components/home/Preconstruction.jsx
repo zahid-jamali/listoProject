@@ -74,12 +74,51 @@ export default function PreConstruction() {
         </div>
 
         {loading ? (
-          <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {[1, 2, 3].map((item) => (
+          <div className="mt-12 grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
+            {[...Array(4)].map((_, index) => (
               <div
-                key={item}
-                className="h-[540px] animate-pulse rounded-[32px] bg-white"
-              />
+                key={index}
+                className="overflow-hidden rounded-[32px] border border-[#E5E7EB] bg-white shadow-[0_10px_35px_rgba(0,0,0,0.05)]"
+              >
+                {/* Image Skeleton */}
+                <div className="relative h-[280px] animate-pulse bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100">
+                  <div className="absolute left-4 top-4 h-7 w-20 rounded-full bg-white/70" />
+                  <div className="absolute left-28 top-4 h-7 w-16 rounded-full bg-white/70" />
+                  <div className="absolute right-4 top-4 h-10 w-10 rounded-full bg-white/70" />
+
+                  <div className="absolute bottom-5 left-5">
+                    <div className="h-8 w-28 rounded-lg bg-white/70" />
+                    <div className="mt-2 h-4 w-20 rounded bg-white/60" />
+                  </div>
+                </div>
+
+                {/* Content Skeleton */}
+                <div className="p-6">
+                  <div className="h-7 w-4/5 animate-pulse rounded-lg bg-slate-200" />
+
+                  <div className="mt-3 h-4 w-1/2 animate-pulse rounded bg-orange-100" />
+
+                  <div className="mt-5 flex gap-2">
+                    <div className="h-4 w-4 rounded-full bg-slate-200" />
+                    <div className="h-4 w-full animate-pulse rounded bg-slate-100" />
+                  </div>
+
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    <div className="h-9 w-20 animate-pulse rounded-full bg-slate-100" />
+                    <div className="h-9 w-20 animate-pulse rounded-full bg-slate-100" />
+                    <div className="h-9 w-28 animate-pulse rounded-full bg-slate-100" />
+                  </div>
+
+                  <div className="mt-6 flex items-center justify-between border-t border-[#F3F4F6] pt-5">
+                    <div className="h-11 w-32 animate-pulse rounded-2xl bg-slate-200" />
+
+                    <div className="flex gap-2">
+                      <div className="h-10 w-10 animate-pulse rounded-2xl bg-slate-100" />
+                      <div className="h-10 w-10 animate-pulse rounded-2xl bg-slate-100" />
+                    </div>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         ) : (

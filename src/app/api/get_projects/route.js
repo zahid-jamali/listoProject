@@ -4,29 +4,10 @@ import { NextResponse } from "next/server";
 
 export async function GET(req) {
   try {
-    // Current request URL
     const { searchParams } = new URL(req.url);
 
-    // Original API
     const upstream = new URL("https://listo.ca/api/get_projects");
 
-    /**
-     * Supported Query Params
-     *
-     * type
-     * area_slug
-     * developer_name
-     * status
-     * country
-     * search
-     * attributes[]
-     * limit
-     * offset
-     * sort
-     * order
-     */
-
-    // Optional filters
     const allowedParams = [
       "type",
       "area_slug",
@@ -34,29 +15,22 @@ export async function GET(req) {
       "status",
       "country",
       "search",
+      "limit",
+      "offset",
+      "sort",
+      "order",
     ];
 
     allowedParams.forEach((param) => {
       const value = searchParams.get(param);
 
-      if (value) {
+      if (value !== null && value !== undefined && value !== "") {
         upstream.searchParams.set(param, value);
       }
     });
 
-    const attributes = searchParams.getAll("attributes[]");
+    console.log(`Projects API URL: ${upstream.toString()}`);
 
-    if (attributes.length > 0) {
-      attributes.forEach((attr) => {
-        upstream.searchParams.append("attributes[]", attr);
-      });
-    }
-
-    // Include total count
-    // upstream.searchParams.set("incl_total", "1");
-
-    // Fetch from original API
-    console.log(`URL: ${upstream.toString()}`);
     const res = await fetch(upstream.toString(), {
       method: "GET",
       headers: {
@@ -68,10 +42,8 @@ export async function GET(req) {
       cache: "no-store",
     });
 
-    // Get raw response
     const text = await res.text();
 
-    // Return same response
     return new NextResponse(text, {
       status: res.status,
       headers: {

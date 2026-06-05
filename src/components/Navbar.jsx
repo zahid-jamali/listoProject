@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Search } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import SearchResultsDropdown from "./SearchResultsDropdown";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -18,7 +20,55 @@ const navLinks = [
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
   const pathname = usePathname();
+  const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef(null);
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClick);
+
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  // onFocus={() => {
+  //   if (results.length) setShowResults(true);
+  // }}
+
+  useEffect(() => {
+    if (query.trim().length < 2) {
+      setResults([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        setLoading(true);
+
+        const res = await fetch(
+          `/api/main-search?q=${encodeURIComponent(query)}`
+        );
+
+        const data = await res.json();
+
+        setResults(data || []);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [query]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,9 +99,9 @@ export default function Navbar() {
       <header
         className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${
           scrolled ? "pt-3" : "pt-4"
-        } px-4 sm:px-6 lg:px-8`}
+        } px-3 sm:px-4 md:px-6 xl:px-8`}
       >
-        <div className="mx-auto max-w-7xl">
+        <div className=" mx-auto max-w-[1600px]">
           <div
             className={`mx-auto flex items-center justify-between rounded-2xl sm:rounded-3xl border transition-all duration-300 ${
               scrolled
@@ -91,7 +141,13 @@ export default function Navbar() {
                 <img
                   src="/assets/logo.png"
                   alt="LISTO"
-                  className="h-8 sm:h-9 md:h-10 w-auto object-contain"
+                  className="h-8
+                  sm:h-9
+                  lg:h-10
+                  xl:h-11
+                  2xl:h-12
+                  w-auto
+                  object-contain"
                 />
               </Link>
             </div>
@@ -112,11 +168,22 @@ export default function Navbar() {
                   {isActive(item.href) && (
                     <motion.div
                       layoutId="activeNav"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full mx-auto w-8"
+                      className="
+                     absolute
+                     left-1/2
+                     -translate-x-1/2
+                     -bottom-[2px]
+                     h-[3px]
+                     w-8
+                     rounded-full
+                     bg-gradient-to-r
+                     from-[#F36B22]
+                     to-orange-400
+                   "
                       transition={{
                         type: "spring",
-                        bounce: 0.2,
-                        duration: 0.6,
+                        stiffness: 900,
+                        damping: 35,
                       }}
                     />
                   )}
@@ -128,30 +195,43 @@ export default function Navbar() {
             <div className="flex items-center gap-2 sm:gap-3">
               {/* Search - Desktop */}
               <div className="hidden md:flex items-center">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search properties..."
-                    className="w-48 lg:w-64 xl:w-80 pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:border-orange-400 focus:bg-white focus:ring-1 focus:ring-orange-400 transition-all"
+                <div ref={searchRef} className="relative hidden md:block">
+                  <Search
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                   />
-                  <svg
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+
+                  <input
+                    value={query}
+                    onChange={(e) => {
+                      setQuery(e.target.value);
+                      setShowResults(true);
+                    }}
+                    placeholder="Search listings, condos, locations..."
+                    className="h-12 xl:h-14 h-12 xl:h-14
+                    w-[220px]
+                    lg:w-[260px]
+                    xl:w-[320px]
+                    2xl:w-[420px]
+                     rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm outline-none transition-all focus:bg-white focus:border-[#F36B22] focus:ring-4 focus:ring-orange-100"
+                  />
+
+                  {showResults && (
+                    <SearchResultsDropdown
+                      query={query}
+                      results={results}
+                      loading={loading}
+                      onClose={() => {
+                        setShowResults(false);
+                        setQuery("");
+                      }}
                     />
-                  </svg>
+                  )}
                 </div>
               </div>
 
               {/* Mobile Search Button */}
-              <button className="md:hidden p-2 rounded-xl hover:bg-gray-50 transition-colors">
+              <button className=" p-2 hidden lg:block rounded-xl hover:bg-gray-50 transition-colors">
                 <svg
                   className="w-5 h-5 text-gray-600"
                   fill="none"
@@ -168,7 +248,7 @@ export default function Navbar() {
               </button>
 
               {/* Share Button */}
-              <button className="p-2 rounded-xl hover:bg-gray-50 transition-colors">
+              <button className="p-2 hidden lg:block  rounded-xl hover:bg-gray-50 transition-colors">
                 <svg
                   className="w-5 h-5 text-gray-600"
                   fill="none"
@@ -185,7 +265,7 @@ export default function Navbar() {
               </button>
 
               {/* User Button */}
-              <button className="p-2 rounded-xl hover:bg-gray-50 transition-colors">
+              <button className="p-2 hidden lg:block rounded-xl hover:bg-gray-50 transition-colors">
                 <svg
                   className="w-5 h-5 text-gray-600"
                   fill="none"
@@ -222,7 +302,7 @@ export default function Navbar() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
-              className="fixed top-[73px] left-4 right-4 z-50 lg:hidden"
+              className="fixed top-[78px] sm:top-[84px] left-2 right-2 sm:left-4 sm:right-4right-4 z-50 lg:hidden"
             >
               <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden max-h-[calc(100vh-100px)] overflow-y-auto">
                 {/* Mobile Search */}
@@ -231,6 +311,11 @@ export default function Navbar() {
                     <input
                       type="text"
                       placeholder="Search properties..."
+                      value={query}
+                      onChange={(e) => {
+                        setQuery(e.target.value);
+                        setShowResults(true);
+                      }}
                       className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:border-orange-400 focus:bg-white transition-all"
                     />
                     <svg
@@ -246,6 +331,14 @@ export default function Navbar() {
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                       />
                     </svg>
+                    <div className="relative">
+                      <SearchResultsDropdown
+                        query={query}
+                        results={results}
+                        loading={loading}
+                        onClose={() => setMobileMenuOpen(false)}
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -309,4 +402,28 @@ export default function Navbar() {
       </AnimatePresence>
     </>
   );
+}
+
+{
+  /* <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search properties..."
+                    className="w-48 lg:w-64 xl:w-80 pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:border-orange-400 focus:bg-white focus:ring-1 focus:ring-orange-400 transition-all"
+                  />
+
+                  <svg
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div> */
 }

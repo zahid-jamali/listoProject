@@ -6,10 +6,12 @@ import { useEffect, useState } from "react";
 import { MapPin, ChevronLeft, ChevronRight, Heart, Share2 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function FeaturedProjects() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   const params = useParams();
 
@@ -146,12 +148,20 @@ export default function FeaturedProjects() {
                       {/* FOOTER */}
                       <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
                         {/* DETAILS BUTTON */}
-                        <Link
-                          href={project.access_url}
+                        {/* <Link
+                          href={`/preconstruction/project`} */}
+                        <button
+                          onClick={() => {
+                            sessionStorage.setItem(
+                              "PG",
+                              JSON.stringify(project)
+                            );
+                            router.push("/preconstruction/project");
+                          }}
                           className="rounded-full bg-gradient-to-r from-[#F36B22] to-[#ff8c4d] px-6 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_8px_20px_rgba(243,107,34,0.35)] transition-all hover:scale-105"
                         >
                           Details
-                        </Link>
+                        </button>
 
                         {/* ACTIONS */}
                         <div className="flex items-center gap-3">
