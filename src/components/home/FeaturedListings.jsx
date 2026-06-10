@@ -32,9 +32,9 @@ export default function FeaturedListings() {
   useEffect(() => {
     const fetchListings = async () => {
       try {
-        const response = await fetch("/api/featured");
+        const response = await fetch("/api/listings?type=RS&limit=3");
         const data = await response.json();
-        setListings(data?.PC || []);
+        setListings(data?.rows || []);
       } catch (error) {
         console.error(error);
       } finally {
@@ -85,8 +85,8 @@ export default function FeaturedListings() {
           </div>
         ) : (
           <>
-            <div className="mt-12 grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-4 ">
-              {listings.slice(0, 4).map((listing, index) => (
+            <div className="mt-12 grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ">
+              {listings.slice(0, 3).map((listing, index) => (
                 <motion.div
                   key={listing.id}
                   custom={index}
@@ -95,13 +95,13 @@ export default function FeaturedListings() {
                   viewport={{ once: true }}
                   variants={fadeUp}
                   whileHover={{ y: -6 }}
-                  className="group overflow-hidden rounded-[32px] border border-[#E5E7EB] bg-white shadow-[0_10px_35px_rgba(0,0,0,0.05)] transition-all hover:shadow-[0_25px_60px_rgba(0,0,0,0.10)]"
+                  className="group overflow-hidden rounded-3xl bg-white border border-gray-200 shadow-sm hover:shadow-xl transition-all"
                 >
-                  <div className="relative h-[250px] overflow-hidden">
+                  <div className="relative h-[220px] overflow-hidden">
                     <img
                       src={listing.thumbnail}
                       alt={listing.title}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="h-full w-full object-cover transition-transform duration-900 group-hover:scale-110"
                     />
 
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
@@ -128,8 +128,8 @@ export default function FeaturedListings() {
                     </div>
                   </div>
 
-                  <div className="p-6">
-                    <h3 className="line-clamp-1 text-xl font-bold text-[#111827]">
+                  <div className="p-2 bg-slate-700 text-white">
+                    <h3 className="line-clamp-1 text-xl font-bold ">
                       {listing.title}
                     </h3>
 
@@ -137,17 +137,17 @@ export default function FeaturedListings() {
                       By {listing.developer_name}
                     </p>
 
-                    <div className="mt-4 flex items-start gap-2">
+                    <div className="mt-2 flex items-start gap-2">
                       <MapPin
                         size={16}
                         className="mt-1 text-[#9CA3AF] flex-shrink-0"
                       />
-                      <p className="line-clamp-2 text-sm leading-6 text-[#6B7280]">
+                      <p className="line-clamp-2 text-sm leading-6 text-[#c4d1ec]">
                         {listing.addr}, {listing.community}
                       </p>
                     </div>
 
-                    <div className="mt-5 flex flex-wrap gap-2">
+                    <div className="mt-2 flex flex-wrap gap-2">
                       <span className="flex items-center gap-2 rounded-full bg-[#F7F8FA] px-3 py-2 text-xs font-medium text-[#4B5563]">
                         <BedDouble size={13} />
                         Luxury
@@ -164,7 +164,7 @@ export default function FeaturedListings() {
                       </span>
                     </div>
 
-                    <div className="mt-6 flex items-center justify-between border-t border-[#F3F4F6] pt-5">
+                    <div className="mt-2 flex items-center justify-between border-t border-[#F3F4F6] pt-2">
                       <Link
                         href={listing.access_url}
                         className="flex items-center gap-2 rounded-2xl bg-[#081A3A] px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-[#102752]"

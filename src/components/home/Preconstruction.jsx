@@ -32,7 +32,7 @@ export default function PreConstruction() {
   useEffect(() => {
     const fetchListings = async () => {
       try {
-        const response = await fetch("/api/featured");
+        const response = await fetch("/api/featured?limit=3");
         const data = await response.json();
         setListings(data?.PC || []);
       } catch (error) {
@@ -123,8 +123,8 @@ export default function PreConstruction() {
           </div>
         ) : (
           <>
-            <div className="mt-12 grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-              {listings.slice(0, 4).map((listing, index) => (
+            <div className="mt-12 grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+              {listings.slice(0, 3).map((listing, index) => (
                 <motion.div
                   key={listing.id}
                   custom={index}
@@ -135,7 +135,7 @@ export default function PreConstruction() {
                   whileHover={{ y: -6 }}
                   className="group overflow-hidden rounded-[32px] border border-[#E5E7EB] bg-white shadow-[0_10px_35px_rgba(0,0,0,0.05)] hover:shadow-[0_25px_60px_rgba(0,0,0,0.10)]"
                 >
-                  <div className="relative h-[280px] overflow-hidden">
+                  <div className="relative h-[220px] overflow-hidden">
                     <img
                       src={listing.thumbnail}
                       alt={listing.title}
@@ -173,8 +173,8 @@ export default function PreConstruction() {
                     </div>
                   </div>
 
-                  <div className="p-6">
-                    <h3 className="line-clamp-1 text-xl font-bold text-[#111827]">
+                  <div className="p-2 bg-slate-700 text-white">
+                    <h3 className="line-clamp-1 text-xl font-bold ">
                       {listing.title}
                     </h3>
 
@@ -182,14 +182,14 @@ export default function PreConstruction() {
                       By {listing.developer_name}
                     </p>
 
-                    <div className="mt-4 flex items-start gap-2">
-                      <MapPin size={16} className="mt-1 text-[#9CA3AF]" />
-                      <p className="line-clamp-2 text-sm leading-6 text-[#6B7280]">
+                    <div className="mt-2 flex items-start gap-2">
+                      <MapPin size={16} className="mt-1 text-[#edf1f8]" />
+                      <p className="line-clamp-2 text-sm leading-6 text-[#bdcdeb]">
                         {listing.addr}, {listing.community}
                       </p>
                     </div>
 
-                    <div className="mt-5 flex flex-wrap gap-2">
+                    <div className="mt-2 flex flex-wrap gap-2">
                       <span className="flex items-center gap-2 rounded-full bg-[#F7F8FA] px-3 py-2 text-xs font-medium text-[#4B5563]">
                         <BedDouble size={13} />
                         Luxury
@@ -206,7 +206,7 @@ export default function PreConstruction() {
                       </span>
                     </div>
 
-                    <div className="mt-6 flex items-center justify-between border-t border-[#F3F4F6] pt-5">
+                    <div className="mt-2 flex items-center justify-between border-t border-[#F3F4F6] pt-2">
                       <Link
                         href={listing.access_url}
                         className="flex items-center gap-2 rounded-2xl bg-[#081A3A] px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-[#102752]"

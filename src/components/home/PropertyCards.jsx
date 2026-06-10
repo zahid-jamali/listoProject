@@ -47,7 +47,7 @@ const fadeUp = {
 
 export default function PropertyCards() {
   return (
-    <section className="bg-[#F7F8FA] py-14 sm:py-16 lg:py-24">
+    <section className="bg-[#F7F8FA] py-14 relative z-0  sm:py-16 lg:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 xl:px-10">
         {/* Header */}
         <div className="text-center">

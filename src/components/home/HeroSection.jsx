@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import { Sparkles, Search } from "lucide-react";
+import HeroSearch from "../GlobalSearch";
+import GlobalSearch from "../GlobalSearch";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -17,7 +19,7 @@ const fadeUp = {
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-[760px] overflow-hidden">
+    <section className="relative min-h-[760px] overflow-hidden z-10">
       <motion.div
         animate={{ scale: [1, 1.03, 1] }}
         transition={{
@@ -53,7 +55,7 @@ export default function HeroSection() {
           animate="visible"
           variants={fadeUp}
           custom={0.1}
-          className="max-w-4xl font-bold tracking-tight text-white text-2xl  sm:text-3xl md:text-5xl"
+          className="max-w-4xl font-bold tracking-tight text-white text-2xl sm:text-3xl md:text-5xl"
         >
           Find your next home in <span className="text-[#F97316]">Canada.</span>
         </motion.h1>
@@ -96,7 +98,7 @@ export default function HeroSection() {
               AI Search
             </motion.button>
           </div>
-
+          {/* 
           <div className="mt-3 flex flex-col gap-3 sm:flex-row">
             <div className="flex h-14 flex-1 items-center rounded-2xl border border-[#E5E7EB] px-4 transition-all focus-within:border-[#F97316]">
               <Search size={18} className="text-[#9CA3AF]" />
@@ -115,6 +117,9 @@ export default function HeroSection() {
             >
               Search
             </motion.button>
+          </div> */}
+          <div className="mt-4 relative z-[99999]">
+            <HeroSearch />
           </div>
         </motion.div>
       </div>

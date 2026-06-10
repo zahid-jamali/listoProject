@@ -39,7 +39,7 @@ export default function SearchResultsDropdown({
   if (!query) return null;
 
   return (
-    <div className="absolute left-0 right-0 top-full z-[999] mt-3 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_25px_80px_rgba(0,0,0,0.15)]">
+    <div className="absolute left-0 right-0 top-full z-[9999] mt-3 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_25px_80px_rgba(0,0,0,0.15)]">
       {loading ? (
         <div className="p-8 text-center">
           <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-[#F36B22] border-t-transparent" />
@@ -52,7 +52,7 @@ export default function SearchResultsDropdown({
           <p className="mt-1 text-sm text-slate-500">Try another search term</p>
         </div>
       ) : (
-        <div className="max-h-[650px] overflow-y-auto">
+        <div className="max-h-[650px] overflow-y-auto z-[9999]">
           {Object.keys(CATEGORY_TITLES).map((category) => {
             const items = results.filter((r) => r.category === category);
 
