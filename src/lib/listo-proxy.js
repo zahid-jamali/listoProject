@@ -5,9 +5,11 @@ export const LISTO_BASE_URL = "https://listo.ca";
 export const DEFAULT_HEADERS = {
   Referer: `${LISTO_BASE_URL}/`,
   Origin: LISTO_BASE_URL,
-  Accept: "application/json",
+  Accept: "application/json, text/plain, */*",
+  "Accept-Language": "en-US,en;q=0.9",
+  // Ek bilkul standard Chrome browser ka User-Agent istemal karein
   "User-Agent":
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 };
 
 function normalizeOrder(value, fallback = "desc") {
@@ -33,6 +35,7 @@ export function buildListoUrl(path, params = {}) {
 }
 
 export function buildForwardHeaders(req, extraHeaders = {}) {
+  // Pehle default headers set karein
   const headers = { ...DEFAULT_HEADERS, ...extraHeaders };
 
   const authHeader = req?.headers?.get("authorization");
@@ -40,6 +43,9 @@ export function buildForwardHeaders(req, extraHeaders = {}) {
 
   const cookieHeader = req?.headers?.get("cookie");
   if (cookieHeader) headers.Cookie = cookieHeader;
+
+  headers["X-Forwarded-For"] = "";
+  headers["X-Real-IP"] = "";
 
   return headers;
 }
