@@ -1,4 +1,4 @@
-import { proxyListoGet } from "../../../lib/listo-buildings-proxy";
+import { proxyListoGet } from "@/lib/listo-proxy";
 
 const ALLOWED_SORTS = [
   "lp_dol",
@@ -22,12 +22,12 @@ export async function GET(req) {
     },
     defaultParams: {
       s_r: "Sale",
+      incl_total: "1",
+      limit: "20",
+      offset: "0",
     },
     allowedSorts: ALLOWED_SORTS,
     defaultSort: "lp_dol",
     defaultOrder: "desc",
-    defaultLimit: "20",
-    defaultOffset: "0",
-    defaultInclTotal: "1",
   });
 }

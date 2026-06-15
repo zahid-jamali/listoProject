@@ -1,45 +1,91 @@
 import { NextResponse } from "next/server";
 
-const DEFAULT_HEADERS = {
-  Referer: "https://listo.ca/",
-  Origin: "https://listo.ca",
+export const LISTO_BASE_URL = "https://listo.ca";
+
+export const DEFAULT_HEADERS = {
+  Referer: `${LISTO_BASE_URL}/`,
+  Origin: LISTO_BASE_URL,
   Accept: "application/json",
-  "User-Agent": "Mozilla/5.0 Next.js Proxy",
+  "User-Agent": "Mozilla/5.0 ProjectListo Proxy",
 };
 
 function normalizeOrder(value, fallback = "desc") {
-  const order = (value || fallback).toLowerCase();
+  const order = String(value || fallback).toLowerCase();
   return order === "asc" ? "asc" : "desc";
 }
 
 function normalizeSort(value, allowedSorts = [], fallback = null) {
-  if (!fallback) return null;
   if (!value) return fallback;
   return allowedSorts.includes(value) ? value : fallback;
 }
 
-function applyCommonListParams(upstream, searchParams, options = {}) {
+export function buildListoUrl(path, params = {}) {
+  const upstream = new URL(`${LISTO_BASE_URL}${path}`);
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      upstream.searchParams.set(key, String(value));
+    }
+  });
+
+  return upstream;
+}
+
+export function buildForwardHeaders(req, extraHeaders = {}) {
+  const headers = { ...DEFAULT_HEADERS, ...extraHeaders };
+
+  const authHeader = req?.headers?.get("authorization");
+  if (authHeader) headers.Authorization = authHeader;
+
+  const cookieHeader = req?.headers?.get("cookie");
+  if (cookieHeader) headers.Cookie = cookieHeader;
+
+  return headers;
+}
+
+function applyParamAliases(searchParams, aliases = {}) {
+  Object.entries(aliases).forEach(([from, to]) => {
+    const value = searchParams.get(from);
+    if (value !== null && value !== "") {
+      searchParams.set(to, value);
+    }
+  });
+}
+
+function applyListParams(upstream, searchParams, options = {}) {
   const {
-    defaultLimit = "10",
+    defaultLimit = "20",
     defaultOffset = "0",
     defaultInclTotal = "1",
-    allowedSorts = [],
     defaultSort = null,
     defaultOrder = "desc",
-    omitSort = false,
+    allowedSorts = [],
+    omitLimit = false,
     omitOffset = false,
+    omitInclTotal = false,
+    omitSort = false,
   } = options;
 
-  const limit = searchParams.get("limit") || defaultLimit;
-  upstream.searchParams.set("limit", limit);
-
-  if (!omitOffset) {
-    const offset = searchParams.get("offset") || defaultOffset;
-    upstream.searchParams.set("offset", offset);
+  if (!omitLimit) {
+    upstream.searchParams.set(
+      "limit",
+      searchParams.get("limit") || defaultLimit
+    );
   }
 
-  const inclTotal = searchParams.get("incl_total") || defaultInclTotal;
-  upstream.searchParams.set("incl_total", inclTotal);
+  if (!omitOffset) {
+    upstream.searchParams.set(
+      "offset",
+      searchParams.get("offset") || defaultOffset
+    );
+  }
+
+  if (!omitInclTotal) {
+    upstream.searchParams.set(
+      "incl_total",
+      searchParams.get("incl_total") || defaultInclTotal
+    );
+  }
 
   if (!omitSort && defaultSort) {
     const sort = normalizeSort(
@@ -48,9 +94,31 @@ function applyCommonListParams(upstream, searchParams, options = {}) {
       defaultSort
     );
     const order = normalizeOrder(searchParams.get("order"), defaultOrder);
-    upstream.searchParams.set("sort", sort);
+
+    if (sort) upstream.searchParams.set("sort", sort);
     upstream.searchParams.set("order", order);
   }
+}
+
+function applyDefaultParams(upstream, searchParams, params = {}) {
+  Object.entries(params).forEach(([key, value]) => {
+    upstream.searchParams.set(key, searchParams.get(key) || String(value));
+  });
+}
+
+function applyLockedParams(upstream, params = {}) {
+  Object.entries(params).forEach(([key, value]) => {
+    upstream.searchParams.set(key, String(value));
+  });
+}
+
+function applyAllowedParams(upstream, searchParams, allowedParams = []) {
+  allowedParams.forEach((key) => {
+    const value = searchParams.get(key);
+    if (value !== null && value !== "") {
+      upstream.searchParams.set(key, value);
+    }
+  });
 }
 
 function forwardRemainingParams(upstream, searchParams, excluded = []) {
@@ -61,67 +129,132 @@ function forwardRemainingParams(upstream, searchParams, excluded = []) {
   });
 }
 
+function getMissingRequired(
+  searchParams,
+  defaultParams,
+  lockedParams,
+  requiredParams
+) {
+  return requiredParams.filter((key) => {
+    if (searchParams.get(key)) return false;
+    if (defaultParams?.[key] !== undefined) return false;
+    if (lockedParams?.[key] !== undefined) return false;
+    return true;
+  });
+}
+
+export function passthroughResponse(res, text) {
+  return new NextResponse(text, {
+    status: res.status,
+    headers: {
+      "Content-Type": res.headers.get("content-type") || "application/json",
+    },
+  });
+}
+
+export async function fetchListo(path, params = {}, init = {}) {
+  const { req, headers: extraHeaders, method = "GET", body } = init;
+  const upstream = buildListoUrl(path, params);
+
+  const res = await fetch(upstream.toString(), {
+    method,
+    headers: buildForwardHeaders(req, extraHeaders),
+    body,
+    cache: "no-store",
+  });
+
+  const text = await res.text();
+  return { res, text, upstream };
+}
+
+export async function fetchListoJson(path, params = {}, init = {}) {
+  const { res, text } = await fetchListo(path, params, init);
+
+  if (!res.ok) {
+    throw new Error(text || `Listo request failed: ${res.status}`);
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
 export async function proxyListoGet(req, options) {
   const {
     upstreamPath,
-    allowedSorts = [],
-    defaultSort = null,
-    defaultOrder = "desc",
-    defaultLimit = "10",
-    defaultOffset = "0",
-    defaultInclTotal = "1",
-    omitSort = false,
-    omitOffset = false,
+    allowedParams = null,
+    paramAliases = {},
+    defaultParams = {},
+    lockedParams = {},
+    requiredParams = [],
     extraExcludedParams = [],
+    errorMessage = "Failed to fetch upstream data",
+    ...listOptions
   } = options;
 
   try {
     const { searchParams } = new URL(req.url);
-    const upstream = new URL(`https://listo.ca${upstreamPath}`);
+    applyParamAliases(searchParams, paramAliases);
 
-    applyCommonListParams(upstream, searchParams, {
-      defaultLimit,
-      defaultOffset,
-      defaultInclTotal,
-      allowedSorts,
-      defaultSort,
-      defaultOrder,
-      omitSort,
-      omitOffset,
-    });
+    const missingRequired = getMissingRequired(
+      searchParams,
+      defaultParams,
+      lockedParams,
+      requiredParams
+    );
 
-    const excluded = [
-      "limit",
-      "offset",
-      "incl_total",
-      "sort",
-      "order",
-      ...extraExcludedParams,
-    ];
+    if (missingRequired.length) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `Missing required params: ${missingRequired.join(", ")}`,
+        },
+        { status: 400 }
+      );
+    }
 
-    forwardRemainingParams(upstream, searchParams, excluded);
+    const upstream = new URL(`${LISTO_BASE_URL}${upstreamPath}`);
+
+    if (allowedParams) {
+      applyAllowedParams(upstream, searchParams, allowedParams);
+      applyDefaultParams(upstream, searchParams, defaultParams);
+    } else {
+      applyListParams(upstream, searchParams, listOptions);
+      applyDefaultParams(upstream, searchParams, defaultParams);
+      applyLockedParams(upstream, lockedParams);
+
+      const excluded = [
+        "limit",
+        "offset",
+        "incl_total",
+        "sort",
+        "order",
+        ...Object.keys(defaultParams),
+        ...Object.keys(lockedParams),
+        ...Object.keys(paramAliases),
+        ...extraExcludedParams,
+      ];
+
+      forwardRemainingParams(upstream, searchParams, excluded);
+    }
 
     const res = await fetch(upstream.toString(), {
       method: "GET",
-      headers: DEFAULT_HEADERS,
+      headers: buildForwardHeaders(req),
       cache: "no-store",
     });
 
     const text = await res.text();
-
-    return new NextResponse(text, {
-      status: res.status,
-      headers: {
-        "Content-Type": res.headers.get("content-type") || "application/json",
-      },
-    });
+    return passthroughResponse(res, text);
   } catch (error) {
-    console.error(`Listo proxy failed for ${options.upstreamPath}:`, error);
+    console.error(`Listo proxy failed for ${upstreamPath}:`, error);
 
     return NextResponse.json(
       {
         success: false,
-        message: "Failed to fetch upstream data",
+        message: errorMessage,
         upstreamPath,
       },
       { status: 500 }

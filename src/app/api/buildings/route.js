@@ -1,4 +1,4 @@
-import { proxyListoGet } from "../../../lib/listo-buildings-proxy";
+import { proxyListoGet } from "@/lib/listo-proxy";
 
 const ALLOWED_SORTS = [
   "addr",
@@ -16,7 +16,5 @@ export async function GET(req) {
     defaultSort: "addr",
     defaultOrder: "asc",
     defaultLimit: "24",
-    defaultOffset: "0",
-    defaultInclTotal: "1",
   });
 }

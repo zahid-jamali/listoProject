@@ -1,11 +1,5 @@
 import { NextResponse } from "next/server";
-
-const DEFAULT_HEADERS = {
-  Referer: "https://listo.ca/",
-  Origin: "https://listo.ca",
-  Accept: "application/json",
-  "User-Agent": "Mozilla/5.0 Next.js Property Page Proxy",
-};
+import { fetchListoJson } from "@/lib/listo-proxy";
 
 function toNumber(value) {
   if (value === null || value === undefined || value === "") return null;
@@ -20,34 +14,8 @@ function toNumber(value) {
   return Number.isFinite(num) ? num : null;
 }
 
-function buildUrl(path, params = {}) {
-  const url = new URL(`https://listo.ca${path}`);
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== "") {
-      url.searchParams.set(key, String(value));
-    }
-  });
-  return url.toString();
-}
-
-async function fetchJson(url) {
-  const res = await fetch(url, {
-    method: "GET",
-    headers: DEFAULT_HEADERS,
-    cache: "no-store",
-  });
-
-  const text = await res.text();
-
-  if (!res.ok) {
-    throw new Error(text || `Request failed: ${res.status}`);
-  }
-
-  try {
-    return JSON.parse(text);
-  } catch {
-    return null;
-  }
+function fetchJson(path, params = {}) {
+  return fetchListoJson(path, params, { req: null });
 }
 
 function mortgagePayment(principal, annualRate, years) {
@@ -137,27 +105,23 @@ export async function POST(req) {
       openHousesResult,
       marketTrendResult,
     ] = await Promise.allSettled([
-      fetchJson(buildUrl("/api/listingPhotos", { id, type })),
-      fetchJson(buildUrl("/api/get_comps", { id, status })),
-      fetchJson(buildUrl("/api/get_comps", { id, type: "SD", status })),
-      fetchJson(buildUrl("/api/get_insights", { id })),
+      fetchJson("/api/listingPhotos", { id, type }),
+      fetchJson("/api/get_comps", { id, status }),
+      fetchJson("/api/get_comps", { id, type: "SD", status }),
+      fetchJson("/api/get_insights", { id }),
       zip
-        ? fetchJson(
-            buildUrl("/api/listingpricechanges", { prop_id: id, incl_total: 1 })
-          )
+        ? fetchJson("/api/listingpricechanges", { prop_id: id, incl_total: 1 })
         : null,
       zip
-        ? fetchJson(buildUrl("/v1/api/get-open-houses", { zip, limit: 6 }))
+        ? fetchJson("/v1/api/get-open-houses", { zip, limit: 6 })
         : null,
       area_slug && munc_slug
-        ? fetchJson(
-            buildUrl("/api/get_sold_monthly_chart_series", {
-              location_type: comm_slug ? "COMM" : "MUNC",
-              area_slug,
-              munc_slug,
-              comm_slug,
-            })
-          )
+        ? fetchJson("/api/get_sold_monthly_chart_series", {
+            location_type: comm_slug ? "COMM" : "MUNC",
+            area_slug,
+            munc_slug,
+            comm_slug,
+          })
         : null,
     ]);
 

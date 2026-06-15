@@ -1,4 +1,4 @@
-import { proxyListoGet } from "../../../lib/listo-proxy";
+import { proxyListoGet } from "@/lib/listo-proxy";
 
 const ALLOWED_SORTS = [
   "id",

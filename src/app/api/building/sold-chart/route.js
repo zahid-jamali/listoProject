@@ -1,4 +1,4 @@
-import { proxyListoGet } from "../../../../lib/listo-buildings-proxy";
+import { proxyListoGet } from "@/lib/listo-proxy";
 
 export async function GET(req) {
   return proxyListoGet(req, {

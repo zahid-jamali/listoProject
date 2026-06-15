@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   BedDouble,
@@ -26,6 +27,7 @@ const fadeUp = {
 };
 
 export default function FeaturedListings() {
+  const router = useRouter();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,6 +46,13 @@ export default function FeaturedListings() {
 
     fetchListings();
   }, []);
+
+  const handleClick = (listing) => {
+    sessionStorage.setItem("listing", JSON.stringify(listing));
+    router.push(
+      `/listings/ind?id=${encodeURIComponent(listing.id)}&type=${encodeURIComponent(listing.type || "RS")}&brd=${encodeURIComponent(listing.brd || "")}`
+    );
+  };
 
   return (
     <section className="bg-[#F7F8FA] py-20 lg:py-24">
@@ -165,13 +174,15 @@ export default function FeaturedListings() {
                     </div>
 
                     <div className="mt-2 flex items-center justify-between border-t border-[#F3F4F6] pt-2">
-                      <Link
-                        href={listing.access_url}
+                      <button
+                        onClick={() => {
+                          handleClick(listing);
+                        }}
                         className="flex items-center gap-2 rounded-2xl bg-[#081A3A] px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-[#102752]"
                       >
                         View Details
                         <ChevronRight size={16} />
-                      </Link>
+                      </button>
 
                       <div className="flex items-center gap-2">
                         <button className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#E5E7EB] text-[#6B7280] transition-all hover:border-[#F97316] hover:text-[#F97316]">

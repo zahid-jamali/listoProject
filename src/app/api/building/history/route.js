@@ -1,4 +1,4 @@
-import { proxyListoGet } from "../../../../lib/listo-buildings-proxy";
+import { proxyListoGet } from "@/lib/listo-proxy";
 
 export async function GET(req) {
   return proxyListoGet(req, {
@@ -10,11 +10,10 @@ export async function GET(req) {
     },
     defaultParams: {
       sort: "unavail_dt",
+      limit: "30",
     },
-    omitLimit: false,
     omitOffset: true,
     omitInclTotal: true,
     omitSort: true,
-    defaultLimit: "30",
   });
 }

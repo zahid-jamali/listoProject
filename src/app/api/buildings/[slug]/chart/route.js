@@ -1,22 +1,14 @@
-import { NextResponse } from "next/server";
+import { proxyListoGet } from "@/lib/listo-proxy";
 
 export async function GET(req, context) {
-  try {
-    const params = await context.params;
-    const response = await fetch(
-      `https://listo.ca/api/buildings/${params.slug}/chart`,
-      {
-        cache: "no-store",
-      }
-    );
+  const { slug } = await context.params;
 
-    const data = await response.json();
-
-    return NextResponse.json(data);
-  } catch (error) {
-    return NextResponse.json(
-      { message: "Something went wrong" },
-      { status: 500 }
-    );
-  }
+  return proxyListoGet(req, {
+    upstreamPath: `/api/buildings/${slug}/chart`,
+    omitLimit: true,
+    omitOffset: true,
+    omitInclTotal: true,
+    omitSort: true,
+    errorMessage: "Failed to fetch building chart data",
+  });
 }
