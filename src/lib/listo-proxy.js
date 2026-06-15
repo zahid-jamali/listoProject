@@ -6,7 +6,8 @@ export const DEFAULT_HEADERS = {
   Referer: `${LISTO_BASE_URL}/`,
   Origin: LISTO_BASE_URL,
   Accept: "application/json",
-  "User-Agent": "Mozilla/5.0 ProjectListo Proxy",
+  "User-Agent":
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
 };
 
 function normalizeOrder(value, fallback = "desc") {
@@ -69,21 +70,21 @@ function applyListParams(upstream, searchParams, options = {}) {
   if (!omitLimit) {
     upstream.searchParams.set(
       "limit",
-      searchParams.get("limit") || defaultLimit
+      searchParams.get("limit") || defaultLimit,
     );
   }
 
   if (!omitOffset) {
     upstream.searchParams.set(
       "offset",
-      searchParams.get("offset") || defaultOffset
+      searchParams.get("offset") || defaultOffset,
     );
   }
 
   if (!omitInclTotal) {
     upstream.searchParams.set(
       "incl_total",
-      searchParams.get("incl_total") || defaultInclTotal
+      searchParams.get("incl_total") || defaultInclTotal,
     );
   }
 
@@ -91,7 +92,7 @@ function applyListParams(upstream, searchParams, options = {}) {
     const sort = normalizeSort(
       searchParams.get("sort"),
       allowedSorts,
-      defaultSort
+      defaultSort,
     );
     const order = normalizeOrder(searchParams.get("order"), defaultOrder);
 
@@ -133,7 +134,7 @@ function getMissingRequired(
   searchParams,
   defaultParams,
   lockedParams,
-  requiredParams
+  requiredParams,
 ) {
   return requiredParams.filter((key) => {
     if (searchParams.get(key)) return false;
@@ -202,7 +203,7 @@ export async function proxyListoGet(req, options) {
       searchParams,
       defaultParams,
       lockedParams,
-      requiredParams
+      requiredParams,
     );
 
     if (missingRequired.length) {
@@ -211,7 +212,7 @@ export async function proxyListoGet(req, options) {
           success: false,
           message: `Missing required params: ${missingRequired.join(", ")}`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -257,7 +258,7 @@ export async function proxyListoGet(req, options) {
         message: errorMessage,
         upstreamPath,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
