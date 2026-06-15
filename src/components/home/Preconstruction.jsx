@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   BedDouble,
@@ -28,6 +29,7 @@ const fadeUp = {
 export default function PreConstruction() {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -207,13 +209,16 @@ export default function PreConstruction() {
                     </div>
 
                     <div className="mt-2 flex items-center justify-between border-t border-[#F3F4F6] pt-2">
-                      <Link
-                        href={listing.access_url}
+                      <button
+                        onClick={() => {
+                          sessionStorage.setItem("PG", JSON.stringify(listing));
+                          router.push("/preconstruction/project");
+                        }}
                         className="flex items-center gap-2 rounded-2xl bg-[#081A3A] px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-[#102752]"
                       >
                         View Details
                         <ChevronRight size={16} />
-                      </Link>
+                      </button>
 
                       <div className="flex items-center gap-2">
                         <button className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#E5E7EB] text-[#6B7280] hover:border-[#F97316] hover:text-[#F97316]">

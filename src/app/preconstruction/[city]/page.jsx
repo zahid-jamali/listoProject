@@ -54,13 +54,13 @@ export default function FeaturedProjects() {
             <div className="flex flex-wrap items-center gap-3">
               {/* TITLE */}
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F36B22]/10">
+                {/* <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F36B22]/10">
                   <img
                     src="/assets/logo.png"
                     alt="logo"
                     className="h-5 w-5 object-contain"
                   />
-                </div>
+                </div> */}
 
                 <h2 className="text-[28px] font-black tracking-[-0.03em] text-[#0B132B] lg:text-[34px]">
                   Pre-Construction projects
@@ -154,7 +154,7 @@ export default function FeaturedProjects() {
                           onClick={() => {
                             sessionStorage.setItem(
                               "PG",
-                              JSON.stringify(project)
+                              JSON.stringify(project),
                             );
                             router.push("/preconstruction/project");
                           }}

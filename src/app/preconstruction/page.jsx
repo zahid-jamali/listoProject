@@ -17,57 +17,233 @@ export default function PreConstructionSection() {
   const projects = [
     {
       city: "Dubai",
-      address: "311 / 2 Gardie Avenue N, Homeside, Hamilton",
+      count: 87,
+      address: "Premium Pre-Construction Projects in Dubai",
       image:
         "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=1200&auto=format&fit=crop",
-      price: "$650,000",
-      completion: "Q4 2026",
-      href: "Dubai",
+      price: "Starting From AED 650K",
+      completion: "Various Completions",
+      href: "dubai",
     },
     {
       city: "Toronto",
-      address: "311 / 2 Gardie Avenue N, Homeside, Hamilton",
+      count: 43,
+      address: "Top Pre-Construction Communities in Toronto",
       image:
         "https://images.unsplash.com/photo-1517935706615-2717063c2225?q=80&w=1200&auto=format&fit=crop",
-      price: "$650,000",
-      completion: "Q4 2026",
-      href: "Toronto",
+      price: "Starting From $650K",
+      completion: "Various Completions",
+      href: "toronto",
     },
     {
-      city: "New York",
-      address: "311 / 2 Gardie Avenue N, Homeside, Hamilton",
+      city: "York",
+      count: 20,
+      address: "New Developments Across York Region",
       image:
         "https://images.unsplash.com/photo-1499092346589-b9b6be3e94b2?q=80&w=1200&auto=format&fit=crop",
-      price: "$650,000",
-      completion: "Q4 2026",
-      href: "York",
+      price: "Starting From $700K",
+      completion: "Various Completions",
+      href: "york",
     },
     {
       city: "Durham",
-      address: "311 / 2 Gardie Avenue N, Homeside, Hamilton",
+      count: 11,
+      address: "Featured Projects in Durham Region",
       image:
         "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop",
-      price: "$650,000",
-      completion: "Q4 2026",
-      href: "Durham",
+      price: "Starting From $600K",
+      completion: "Various Completions",
+      href: "durham",
     },
     {
       city: "Peel",
-      address: "311 / 2 Gardie Avenue N, Homeside, Hamilton",
+      count: 7,
+      address: "Explore New Communities in Peel",
       image:
         "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?q=80&w=1200&auto=format&fit=crop",
-      price: "$650,000",
-      completion: "Q4 2026",
-      href: "Peel",
+      price: "Starting From $650K",
+      completion: "Various Completions",
+      href: "peel",
     },
     {
       city: "Halton",
-      address: "311 / 2 Gardie Avenue N, Homeside, Hamilton",
+      count: 7,
+      address: "Luxury Homes & Condos in Halton",
       image:
         "https://images.unsplash.com/photo-1448630360428-65456885c650?q=80&w=1200&auto=format&fit=crop",
-      price: "$800,000",
-      completion: "Q4 2026",
-      href: "Halton",
+      price: "Starting From $800K",
+      completion: "Various Completions",
+      href: "halton",
+    },
+    {
+      city: "Waterloo",
+      count: 3,
+      address: "Investment Opportunities in Waterloo",
+      image:
+        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200&auto=format&fit=crop",
+      price: "Starting From $550K",
+      completion: "Various Completions",
+      href: "waterloo",
+    },
+    {
+      city: "Hamilton",
+      count: 3,
+      address: "New Construction Projects in Hamilton",
+      image:
+        "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?q=80&w=1200&auto=format&fit=crop",
+      price: "Starting From $600K",
+      completion: "Various Completions",
+      href: "hamilton",
+    },
+    {
+      city: "Sharjah",
+      count: 3,
+      address: "Affordable Projects in Sharjah",
+      image:
+        "https://images.unsplash.com/photo-1518684079-3c830dcef090?q=80&w=1200&auto=format&fit=crop",
+      price: "Starting From AED 450K",
+      completion: "Various Completions",
+      href: "sharjah",
+    },
+    {
+      city: "Simcoe County",
+      count: 3,
+      address: "Growing Communities in Simcoe County",
+      image:
+        "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200&auto=format&fit=crop",
+      price: "Starting From $550K",
+      completion: "Various Completions",
+      href: "simcoe-county",
+    },
+    {
+      city: "Niagara",
+      count: 2,
+      address: "Waterfront Developments in Niagara",
+      image:
+        "https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=1200&auto=format&fit=crop",
+      price: "Starting From $500K",
+      completion: "Various Completions",
+      href: "niagara",
+    },
+    {
+      city: "Whitby",
+      count: 2,
+      address: "Featured Whitby Projects",
+      image:
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1200&auto=format&fit=crop",
+      price: "Starting From $650K",
+      completion: "Various Completions",
+      href: "whitby",
+    },
+    {
+      city: "Abu Dhabi",
+      count: 1,
+      address: "Premium Developments in Abu Dhabi",
+      image:
+        "https://images.unsplash.com/photo-1518684079-3c830dcef090?q=80&w=1200&auto=format&fit=crop",
+      price: "Starting From AED 700K",
+      completion: "Various Completions",
+      href: "abudhabi",
+    },
+    {
+      city: "Brampton",
+      count: 1,
+      address: "New Projects in Brampton",
+      image:
+        "https://images.unsplash.com/photo-1494526585095-c41746248156?q=80&w=1200&auto=format&fit=crop",
+      price: "Starting From $700K",
+      completion: "Various Completions",
+      href: "brampton",
+    },
+    {
+      city: "Dubai Marina",
+      count: 1,
+      address: "Luxury Waterfront Projects in Dubai Marina",
+      image:
+        "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?q=80&w=1200&auto=format&fit=crop",
+      price: "Starting From AED 1.2M",
+      completion: "Various Completions",
+      href: "dubai-marina",
+    },
+    {
+      city: "Grey County",
+      count: 1,
+      address: "New Communities in Grey County",
+      image:
+        "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1200&auto=format&fit=crop",
+      price: "Starting From $500K",
+      completion: "Various Completions",
+      href: "grey-county",
+    },
+    {
+      city: "Hastings County",
+      count: 1,
+      address: "Featured Developments in Hastings County",
+      image:
+        "https://images.unsplash.com/photo-1449844908441-8829872d2607?q=80&w=1200&auto=format&fit=crop",
+      price: "Starting From $450K",
+      completion: "Various Completions",
+      href: "hastings-county",
+    },
+    {
+      city: "Middlesex County",
+      count: 1,
+      address: "Residential Projects in Middlesex County",
+      image:
+        "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=1200&auto=format&fit=crop",
+      price: "Starting From $500K",
+      completion: "Various Completions",
+      href: "middlesex-county",
+    },
+    {
+      city: "Northumberland County",
+      count: 1,
+      address: "Emerging Communities in Northumberland County",
+      image:
+        "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=1200&auto=format&fit=crop",
+      price: "Starting From $450K",
+      completion: "Various Completions",
+      href: "northumberland-county",
+    },
+    {
+      city: "Perth County",
+      count: 1,
+      address: "New Housing Opportunities in Perth County",
+      image:
+        "https://images.unsplash.com/photo-1600585154526-990dced4db0d?q=80&w=1200&auto=format&fit=crop",
+      price: "Starting From $500K",
+      completion: "Various Completions",
+      href: "perth-county",
+    },
+    {
+      city: "Port Colborne",
+      count: 1,
+      address: "Featured Homes in Port Colborne",
+      image:
+        "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=1200&auto=format&fit=crop",
+      price: "Starting From $450K",
+      completion: "Various Completions",
+      href: "portcolborne",
+    },
+    {
+      city: "Scarborough",
+      count: 1,
+      address: "Scarborough New Developments",
+      image:
+        "https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=1200&auto=format&fit=crop",
+      price: "Starting From $650K",
+      completion: "Various Completions",
+      href: "scarborough",
+    },
+    {
+      city: "Simcoe",
+      count: 1,
+      address: "Simcoe Real Estate Opportunities",
+      image:
+        "https://images.unsplash.com/photo-1518780664697-55e3ad937233?q=80&w=1200&auto=format&fit=crop",
+      price: "Starting From $500K",
+      completion: "Various Completions",
+      href: "simcoe",
     },
   ];
 
@@ -132,7 +308,7 @@ export default function PreConstructionSection() {
             >
               <Link href={`/preconstruction/${project.href}`}>
                 <div className="overflow-hidden rounded-[32px] border border-[#E5E7EB] bg-white shadow-[0_10px_35px_rgba(0,0,0,0.05)] hover:shadow-[0_25px_60px_rgba(0,0,0,0.10)]">
-                  <div className="relative h-[260px] overflow-hidden">
+                  <div className="relative h-[220px] overflow-hidden">
                     <img
                       src={project.image}
                       alt={project.city}
@@ -153,12 +329,12 @@ export default function PreConstructionSection() {
                       </p>
                     </div>
 
-                    <div className="mt-6 flex items-center justify-between border-t border-[#F3F4F6] pt-5">
+                    <div className="mt-2 flex items-center justify-between border-t border-[#F3F4F6] pt-2">
                       <div>
                         <p className="text-xs uppercase tracking-wider text-[#9CA3AF]">
                           Starting From
                         </p>
-                        <p className="mt-1 text-lg font-bold text-[#F97316]">
+                        <p className="mt-1 text-md font-bold text-[#F97316]">
                           {project.price}
                         </p>
                       </div>
@@ -167,7 +343,7 @@ export default function PreConstructionSection() {
                         <p className="text-xs uppercase tracking-wider text-[#9CA3AF]">
                           Completion
                         </p>
-                        <p className="mt-1 text-lg font-bold text-[#111827]">
+                        <p className="mt-1 text-md font-bold text-[#111827]">
                           {project.completion}
                         </p>
                       </div>

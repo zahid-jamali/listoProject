@@ -19,7 +19,7 @@ const fadeUp = {
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-[760px] overflow-hidden z-10">
+    <section className="relative min-h-[760px] overflow-hidden">
       <motion.div
         animate={{ scale: [1, 1.03, 1] }}
         transition={{
@@ -77,6 +77,7 @@ export default function HeroSection() {
           variants={fadeUp}
           custom={0.3}
           className="mt-10 w-full max-w-[700px] rounded-[32px] border border-white/10 bg-white p-3 shadow-[0_20px_60px_rgba(0,0,0,0.22)]"
+          style={{ isolation: "isolate" }}
         >
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center rounded-full bg-[#F7F8FA] p-1">
@@ -118,7 +119,7 @@ export default function HeroSection() {
               Search
             </motion.button>
           </div> */}
-          <div className="mt-4 relative z-[99999]">
+          <div className="mt-4">
             <HeroSearch />
           </div>
         </motion.div>

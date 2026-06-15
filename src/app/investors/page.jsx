@@ -2,13 +2,14 @@
 
 import { motion } from "framer-motion";
 import { ChevronDown, Sparkles, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 const cities = [
-  { name: "Toronto", count: 1107 },
-  { name: "Dubai", count: 847 },
-  { name: "New York", count: 532 },
-  { name: "London", count: 420 },
+  { name: "Toronto", count: 1107, href: "toronto" },
+  { name: "Dubai", count: 847, href: "dubai" },
+  { name: "New York", count: 532, href: "york" },
+  { name: "London", count: 420, href: "london" },
 ];
 
 export default function InvestorListings() {
@@ -56,7 +57,7 @@ export default function InvestorListings() {
               value={selectedCity.name}
               onChange={(e) => {
                 const city = cities.find(
-                  (item) => item.name === e.target.value
+                  (item) => item.name === e.target.value,
                 );
                 setSelectedCity(city);
               }}
@@ -76,21 +77,24 @@ export default function InvestorListings() {
           </div>
 
           <div className="mt-8 flex justify-center">
-            <motion.button
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-2 rounded-2xl bg-[#081A3A] px-7 py-3 text-sm font-semibold text-white transition-all hover:bg-[#102752]"
-            >
-              View Opportunities
-              <ArrowRight size={16} />
-            </motion.button>
+            <Link href={`/investors/${selectedCity.href}`}>
+              <motion.button
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex items-center gap-2 rounded-2xl bg-[#081A3A] px-7 py-3 text-sm font-semibold text-white transition-all hover:bg-[#102752]"
+              >
+                View Opportunities
+                <ArrowRight size={16} />
+              </motion.button>
+            </Link>
           </div>
 
           <div className="mt-8 flex items-center justify-center gap-2 rounded-2xl border border-[#FED7AA] bg-[#FFF7ED] px-4 py-3">
             <Sparkles size={14} className="text-[#F97316]" />
 
             <p className="text-sm font-medium text-[#F97316]">
-              Compare listings against minimum and maximum sold prices by lot size.
+              Compare listings against minimum and maximum sold prices by lot
+              size.
             </p>
           </div>
         </motion.div>
