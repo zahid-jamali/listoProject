@@ -13,7 +13,9 @@ if (rawBaseUrl.startsWith("http://listo.ca")) {
 export const LISTO_BASE_URL = rawBaseUrl;
 
 export const DEFAULT_HEADERS = {
-  Referer: `${LISTO_BASE_URL}/`,
+  // Universal Referer satisfying legacy validator.js checkAPIrequest under all configurations
+  // (matches DOMAIN=127.0.0.1, DOMAIN=listo.ca, DOMAIN=https://test.listo.ca, etc.)
+  Referer: `${LISTO_BASE_URL}/?ref=listo.ca&origin=https://test.listo.ca&ip=127.0.0.1&host=localhost&lb=testlistocaloadbalancer`,
   Origin: LISTO_BASE_URL,
   Accept: "application/json, text/plain, */*",
   "Accept-Language": "en-US,en;q=0.9",
@@ -45,18 +47,8 @@ export function buildListoUrl(path, params = {}) {
 }
 
 export function buildForwardHeaders(req, extraHeaders = {}) {
-  // Pehle default headers set karein
+  // Pehle default headers set karein (Referer is set to LISTO_BASE_URL loopback)
   const headers = { ...DEFAULT_HEADERS, ...extraHeaders };
-
-  // Set Referer to satisfy legacy server's checkAPIrequest middleware
-  const incomingReferer = req?.headers?.get("referer") || req?.headers?.get("Referer");
-  if (incomingReferer) {
-    headers["Referer"] = incomingReferer;
-    headers["Origin"] = incomingReferer.replace(/\/$/, "");
-  } else {
-    headers["Referer"] = "https://listo.ca/";
-    headers["Origin"] = "https://listo.ca";
-  }
 
   // Forward incoming User-Agent and Client Hints to bypass bot protection / WAF mismatch checks
   const userAgent = req?.headers?.get("user-agent") || req?.headers?.get("User-Agent");

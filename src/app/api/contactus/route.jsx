@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { LISTO_BASE_URL } from "@/lib/listo-proxy";
+import { LISTO_BASE_URL, buildForwardHeaders } from "@/lib/listo-proxy";
 
 const PURPOSE_MAP = {
   general: "GENERAL",
@@ -32,15 +32,9 @@ export async function POST(req) {
 
     const response = await fetch(`${LISTO_BASE_URL}/v1/api/contact`, {
       method: "POST",
-      headers: {
-        Referer: `${LISTO_BASE_URL}/`,
-        Origin: LISTO_BASE_URL,
-        Accept: "application/json, text/plain, */*",
-        "Accept-Language": "en-US,en;q=0.9",
+      headers: buildForwardHeaders(req, {
         "Content-Type": "application/json",
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-      },
+      }),
       body: JSON.stringify(payload),
       cache: "no-store",
     });
