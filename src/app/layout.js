@@ -5,6 +5,18 @@ import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/context/AuthContext";
 import { LocationProvider } from "@/context/LocationContext";
 
+export const metadata = {
+  title: {
+    default: "Listo",
+    template: "%s | Listo",
+  },
+  description:
+    "Find homes for sale, condos, pre-construction projects and real estate listings in Ontario with Listo.",
+  icons: {
+    icon: "/favicon.ico",
+  },
+};
+
 export const viewport = {
   width: "device-width",
   initialScale: 1,

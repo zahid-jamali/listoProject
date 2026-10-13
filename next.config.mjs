@@ -147,6 +147,16 @@ const nextConfig = {
           destination: "/listings",
         },
       ],
+
+      // fallback runs only if neither Next.js routes nor files matched.
+      // Unhandled paths (like /user-dashboard/*, /master/*, /internal/*)
+      // are automatically forwarded to the legacy Express server on port 3002.
+      fallback: [
+        {
+          source: "/:path*",
+          destination: `${process.env.LISTO_API_BASE_URL || "http://127.0.0.1:3002"}/:path*`,
+        },
+      ],
     };
   },
 

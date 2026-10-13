@@ -48,6 +48,16 @@ export function buildForwardHeaders(req, extraHeaders = {}) {
   // Pehle default headers set karein
   const headers = { ...DEFAULT_HEADERS, ...extraHeaders };
 
+  // Set Referer to satisfy legacy server's checkAPIrequest middleware
+  const incomingReferer = req?.headers?.get("referer") || req?.headers?.get("Referer");
+  if (incomingReferer) {
+    headers["Referer"] = incomingReferer;
+    headers["Origin"] = incomingReferer.replace(/\/$/, "");
+  } else {
+    headers["Referer"] = "https://listo.ca/";
+    headers["Origin"] = "https://listo.ca";
+  }
+
   // Forward incoming User-Agent and Client Hints to bypass bot protection / WAF mismatch checks
   const userAgent = req?.headers?.get("user-agent") || req?.headers?.get("User-Agent");
   if (userAgent) headers["User-Agent"] = userAgent;
