@@ -1,20 +1,28 @@
 import { proxyListoGet } from "@/lib/listo-proxy";
 
-const ALLOWED_SORTS = [
-  "addr",
-  "title",
-  "area_slug",
-  "munc_slug",
-  "count_total",
-  "count",
-];
-
+/**
+ * Popular buildings directory.
+ * Legacy: GET /api/popular_buildings?area_slug=&search=&limit=&offset=
+ */
 export async function GET(req) {
   return proxyListoGet(req, {
     upstreamPath: "/api/popular_buildings",
-    allowedSorts: ALLOWED_SORTS,
-    defaultSort: "addr",
-    defaultOrder: "asc",
-    defaultLimit: "24",
+    allowedParams: [
+      "area_slug",
+      "search",
+      "limit",
+      "offset",
+      "incl_total",
+      "sort",
+      "order",
+    ],
+    defaultParams: {
+      limit: "24",
+      offset: "0",
+      incl_total: "1",
+      sort: "count_total",
+      order: "desc",
+    },
+    errorMessage: "Failed to fetch buildings",
   });
 }

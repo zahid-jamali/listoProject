@@ -1,10 +1,11 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function Pagination({ currentPage, totalPages }) {
   const router = useRouter();
+  const pathname = usePathname() || "/trending";
 
   if (totalPages <= 1) return null;
 
@@ -12,7 +13,7 @@ export default function Pagination({ currentPage, totalPages }) {
     <div className="mt-14 flex justify-center items-center gap-3">
       <button
         disabled={currentPage === 1}
-        onClick={() => router.push(`/trending?page=${currentPage - 1}`)}
+        onClick={() => router.push(`${pathname}?page=${currentPage - 1}`)}
         className="h-10 w-10 rounded-md border bg-white flex items-center justify-center disabled:opacity-40"
       >
         <ChevronLeft size={18} />
@@ -27,7 +28,7 @@ export default function Pagination({ currentPage, totalPages }) {
           .map((page) => (
             <button
               key={page}
-              onClick={() => router.push(`/trending?page=${page}`)}
+              onClick={() => router.push(`${pathname}?page=${page}`)}
               className={`h-10 min-w-[40px] rounded-md font-medium ${
                 currentPage === page
                   ? "bg-[#F58233] text-white"
@@ -41,7 +42,7 @@ export default function Pagination({ currentPage, totalPages }) {
 
       <button
         disabled={currentPage === totalPages}
-        onClick={() => router.push(`/trending?page=${currentPage + 1}`)}
+        onClick={() => router.push(`${pathname}?page=${currentPage + 1}`)}
         className="h-10 w-10 rounded-md border bg-white flex items-center justify-center disabled:opacity-40"
       >
         <ChevronRight size={18} />

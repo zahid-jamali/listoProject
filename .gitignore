@@ -10,12 +10,22 @@
 !.yarn/releases
 !.yarn/versions
 
+legacy-inquiry-auth-pack
+legacy-Listo
+AGENTS.n
+API-DOCUMENTATION-NEXTJS.md 
+CLAUDE.md
+Issues
+
+
 # testing
 /coverage
 
 # next.js
 /.next/
 /out/
+
+/legacy-Listo
 
 # production
 /build

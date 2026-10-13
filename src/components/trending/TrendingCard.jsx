@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   BedDouble,
   Bath,
@@ -8,11 +7,14 @@ import {
   Maximize2,
   ChevronLeft,
   ChevronRight,
-  Bookmark,
+  Share2,
 } from "lucide-react";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { getListingUrl, stashListing } from "@/lib/listing-url";
+import Bookmark from "@/components/Bookmark";
 
 export default function TrendingCard({ listing }) {
   const [active, setActive] = useState(0);
@@ -30,10 +32,31 @@ export default function TrendingCard({ listing }) {
   };
 
   const handleClick = (listing) => {
-    sessionStorage.setItem("listing", JSON.stringify(listing));
-    router.push(
-      `/listings/ind?id=${encodeURIComponent(listing.id)}&type=${encodeURIComponent(listing.type || "RS")}&brd=${encodeURIComponent(listing.brd || "")}`,
-    );
+    stashListing(listing);
+    router.push(getListingUrl(listing));
+  };
+
+  const handleShare = async (e) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}${getListingUrl(listing)}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: listing.addr || "LISTO Property",
+          text: `Check out ${listing.addr || "this property"} on LISTO`,
+          url,
+        });
+        return;
+      } catch {
+        // fallback to clipboard
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Listing link copied to clipboard!");
+    } catch {
+      toast.error("Unable to copy link");
+    }
   };
 
   return (
@@ -63,14 +86,16 @@ export default function TrendingCard({ listing }) {
         {/* badges */}
 
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-          {listing.badges1?.map((badge, i) => (
-            <span
-              key={i}
-              className="rounded-full bg-white/90 px-1 py-1 text-[10px] font-medium"
-            >
-              {badge.text}
-            </span>
-          ))}
+          {(Array.isArray(listing.badges1) ? listing.badges1 : []).map(
+            (badge, i) => (
+              <span
+                key={i}
+                className="rounded-full bg-white/90 px-1 py-1 text-[10px] font-medium"
+              >
+                {badge?.text}
+              </span>
+            ),
+          )}
         </div>
 
         <div className="absolute bottom-3 right-3 rounded-full bg-black/50 px-2 py-1 text-xs text-white flex items-center gap-1">
@@ -119,12 +144,20 @@ export default function TrendingCard({ listing }) {
             Details →
           </button>
 
-          <div className="flex gap-4 text-white">
-            <Bookmark size={16} />
+          <div className="flex items-center gap-2 text-white">
+            <Bookmark
+              listing={listing}
+              className="!border-white/20 !text-white hover:!border-[#F97316] hover:!text-[#F97316]"
+            />
 
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7a2.48 2.48 0 0 0 0-1.39l7-4.11A2.99 2.99 0 1 0 15 5a2.8 2.8 0 0 0 .05.52l-7 4.11a3 3 0 1 0 0 4.74l7.12 4.18A2.8 2.8 0 0 0 15 19a3 3 0 1 0 3-2.92Z" />
-            </svg>
+            <button
+              type="button"
+              onClick={handleShare}
+              title="Share listing"
+              className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/20 text-white transition hover:border-[#F97316] hover:text-[#F97316]"
+            >
+              <Share2 size={15} />
+            </button>
           </div>
         </div>
       </div>

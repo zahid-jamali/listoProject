@@ -74,13 +74,13 @@ function FeatureSection() {
 
 function WhyJoinSection() {
   return (
-    <section className="bg-white py-24">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="grid items-center gap-20 lg:grid-cols-2">
+    <section className="bg-white py-16 sm:py-24">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="grid items-center gap-12 lg:gap-20 lg:grid-cols-2">
           {/* LEFT */}
 
           <div>
-            <h2 className="text-[52px] font-black leading-tight text-[#02132D]">
+            <h2 className="text-3xl sm:text-[42px] lg:text-[52px] font-black leading-tight text-[#02132D]">
               You should fit right in,
               <br />
               if you are
@@ -94,11 +94,11 @@ function WhyJoinSection() {
             <div className="mt-12 space-y-8">
               {benefits.map((item) => (
                 <div key={item} className="flex items-start gap-4">
-                  <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-[#F58233]/10">
+                  <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-[#F58233]/10 shrink-0">
                     <CheckCircle2 className="text-[#F58233]" size={20} />
                   </div>
 
-                  <p className="text-[19px] font-semibold text-[#02132D]">
+                  <p className="text-base sm:text-[19px] font-semibold text-[#02132D]">
                     {item}
                   </p>
                 </div>
@@ -112,16 +112,16 @@ function WhyJoinSection() {
             <img
               src="/assets/join-listo-2.png"
               alt=""
-              className="h-[600px] w-full rounded-[36px] object-cover shadow-[0_20px_60px_rgba(0,0,0,0.15)]"
+              className="h-[360px] sm:h-[480px] lg:h-[600px] w-full rounded-[28px] sm:rounded-[36px] object-cover shadow-[0_20px_60px_rgba(0,0,0,0.15)]"
             />
 
-            <div className="absolute bottom-10 left-[-40px] max-w-[320px] rounded-[24px] bg-[#02132D] p-6 text-white shadow-2xl">
-              <p className="italic text-gray-300">
+            <div className="mt-4 sm:mt-0 sm:absolute sm:bottom-10 sm:left-[-20px] lg:left-[-40px] max-w-[320px] rounded-[24px] bg-[#02132D] p-5 sm:p-6 text-white shadow-2xl">
+              <p className="italic text-gray-300 text-sm">
                 “Joining LISTO was the catalyst my career needed. The technology
                 is years ahead of the competition.”
               </p>
 
-              <div className="mt-4 text-[#F58233] font-semibold">
+              <div className="mt-4 text-[#F58233] font-semibold text-sm">
                 Sarah J. — Senior Associate
               </div>
             </div>
@@ -134,7 +134,7 @@ function WhyJoinSection() {
 
 function JoinHero() {
   return (
-    <section className="relative h-[520px] overflow-hidden">
+    <section className="relative min-h-[460px] sm:h-[520px] overflow-hidden">
       <img
         src="/assets/join-listo-1.png"
         alt=""
@@ -143,19 +143,19 @@ function JoinHero() {
 
       <div className="absolute inset-0 bg-black/65" />
 
-      <div className="relative z-10 flex h-full items-center justify-center">
-        <div className="max-w-4xl px-6 text-center text-white">
+      <div className="relative z-10 flex h-full items-center justify-center py-20 sm:py-0">
+        <div className="max-w-4xl px-4 sm:px-6 text-center text-white">
           <span className="rounded-full bg-[#F58233] px-4 py-2 text-xs font-semibold tracking-wide">
             Real Estate Professionals Welcome!
           </span>
 
-          <h1 className="mt-6 text-[58px] font-black leading-[1.05] tracking-[-2px]">
+          <h1 className="mt-6 text-3xl sm:text-[44px] md:text-[58px] font-black leading-[1.1] sm:leading-[1.05] tracking-[-1px] sm:tracking-[-2px]">
             Join the Fastest Growing
             <br />
             Real Estate Platform
           </h1>
 
-          <p className="mx-auto mt-6 max-w-3xl text-[15px] leading-8 text-gray-200">
+          <p className="mx-auto mt-6 max-w-3xl text-sm sm:text-[15px] leading-7 sm:leading-8 text-gray-200">
             LISTO stands out as the real estate company tailored to current
             needs. Our technology, data insights and support ecosystem help
             agents grow faster and serve clients better.

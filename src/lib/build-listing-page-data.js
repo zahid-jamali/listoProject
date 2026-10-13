@@ -1,4 +1,8 @@
 import { fetchListoJson } from "@/lib/listo-proxy";
+import {
+  enrichListingFromHtml,
+  pickPair,
+} from "@/lib/enrich-listing-from-html";
 
 function toNumber(value) {
   if (value === null || value === undefined || value === "") return null;
@@ -78,6 +82,122 @@ function statusLabel(status) {
   return map[status] || status || "Active";
 }
 
+function isLeaseListing(listing) {
+  return String(listing?.s_r || "").toLowerCase() === "lease";
+}
+
+function isUsablePrice(value, text = "") {
+  const num = toNumber(value);
+  if (!num || num <= 0) return false;
+  if (/x/i.test(String(text || value || ""))) return false;
+  return true;
+}
+
+function asList(data) {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data.rows)) return data.rows;
+  return [data];
+}
+
+function addrKey(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/#.*$/, "")
+    .replace(/[^a-z0-9]+/g, "");
+}
+
+function matchesListingAddress(listing, row) {
+  const listingKey = addrKey(listing?.addr);
+  if (!listingKey) return false;
+  const rowKey =
+    addrKey(row?.name) + addrKey(row?.access_url) + addrKey(row?.addr);
+  return rowKey.includes(listingKey);
+}
+
+function withMonthlySuffix(text) {
+  const value = String(text || "").trim();
+  if (!value) return null;
+  if (/\/\s*(mth|mo|month)/i.test(value)) return value;
+  return `${value} /mth`;
+}
+
+function pickSaleHitFromSearch(listing, searchData) {
+  const homes = asList(searchData).filter(
+    (row) => String(row?.category || "").toUpperCase() === "HOMES",
+  );
+
+  return (
+    homes.find((row) => {
+      const heading = String(row?.sub_heading || "");
+      const url = String(row?.access_url || "");
+      const isSale =
+        /for\s*sale/i.test(heading) ||
+        url.includes("-for-sale/") ||
+        String(row?.s_r || "") === "Sale";
+      return (
+        isSale &&
+        matchesListingAddress(listing, row) &&
+        isUsablePrice(row?.lp_dol, row?.lp_dol)
+      );
+    }) || null
+  );
+}
+
+function resolveHeroPrice(listing, saleHit) {
+  const nativeIsLease = isLeaseListing(listing);
+  const nativePrice = listing?.lp_dol || null;
+  const nativeText = listing?.lp_dol_text || null;
+  const nativeUsable = isUsablePrice(nativePrice, nativeText);
+  const nativeKind = nativeIsLease ? "lease" : "sale";
+  const nativeDisplayText = nativeIsLease
+    ? withMonthlySuffix(nativeText)
+    : nativeText;
+
+  if (!nativeIsLease && nativeUsable) {
+    return {
+      price: nativePrice,
+      priceText: nativeText,
+      priceKind: "sale",
+      priceLabel: "List price",
+      leasePriceText: null,
+      nativePrice,
+      nativePriceText: nativeText,
+      nativeKind: "sale",
+    };
+  }
+
+  const saleRaw = saleHit?.lp_dol || saleHit?.lp_dol_text || null;
+  const saleText =
+    typeof saleRaw === "string" && saleRaw.includes("$")
+      ? saleRaw
+      : saleHit?.lp_dol_text || null;
+
+  if (saleHit && isUsablePrice(saleRaw, saleText || saleRaw)) {
+    return {
+      price: toNumber(saleRaw),
+      priceText: saleText,
+      priceKind: "sale",
+      priceLabel: "List price",
+      leasePriceText: nativeUsable ? nativeDisplayText : null,
+      nativePrice,
+      nativePriceText: nativeDisplayText,
+      nativeKind,
+    };
+  }
+
+  return {
+    price: nativePrice,
+    priceText: nativeDisplayText,
+    priceKind: nativeKind,
+    priceLabel: nativeIsLease ? "For lease" : "List price",
+    leasePriceText: null,
+    nativePrice,
+    nativePriceText: nativeDisplayText,
+    nativeKind,
+  };
+}
+
 export async function buildListingPageData(body = {}, req = null) {
   const listing = { ...(body?.listing || body) };
   let id = listing?.id || body?.id;
@@ -89,18 +209,64 @@ export async function buildListingPageData(body = {}, req = null) {
     throw new Error("Missing required listing id");
   }
 
-  if (!listing?.addr || !listing?.lp_dol) {
+  // When we only have identifiers (direct visit / SEO / shared link), fetch the
+  // full record. We forward every hint we have and then VERIFY the returned row
+  // actually matches the requested id, so we never render the wrong property if
+  // the upstream search ignores the id filter.
+  const needsCardFetch =
+    !listing?.addr || !listing?.lp_dol || !listing?.access_url;
+
+  if (needsCardFetch) {
     const rows = await fetchListoJson(
       "/api/listings",
-      { type, id, limit: 1, out: "M" },
-      { req }
+      {
+        type,
+        id,
+        brd,
+        s_r: body?.s_r || listing?.s_r || "",
+        sub_type: body?.sub_type || listing?.sub_type || "",
+        area_slug: body?.area_slug || listing?.area_slug || "",
+        munc_slug: body?.munc_slug || listing?.munc_slug || "",
+        loc_type: body?.loc_type || listing?.loc_type || "",
+        search_text:
+          body?.search_text ||
+          listing?.search_text ||
+          body?.munc_slug ||
+          listing?.munc_slug ||
+          "",
+        limit: 50,
+        out: "M",
+        sort: "ld",
+        order: "desc",
+      },
+      { req },
+    ).catch(() => null);
+
+    const match = (rows?.rows || []).find(
+      (r) => String(r.id) === String(id),
     );
 
-    if (rows?.rows?.[0]) {
-      Object.assign(listing, rows.rows[0]);
+    if (match) {
+      Object.assign(listing, match);
       type = listing.type || type;
       brd = listing.brd || brd;
     }
+  }
+
+  // Public list APIs omit ad_text / rooms / utilities. Enrich from the SSR
+  // listing page HTML (same source legacy detail tabs use).
+  const enrichment = listing?.access_url
+    ? await enrichListingFromHtml(listing.access_url, req)
+    : null;
+
+  if (enrichment?.ad_text && !listing.ad_text) {
+    listing.ad_text = enrichment.ad_text;
+  }
+  if (enrichment?.extras && !listing.extras) {
+    listing.extras = enrichment.extras;
+  }
+  if (enrichment?.rooms?.length) {
+    listing.rooms = enrichment.rooms;
   }
 
   const zip = body?.zip || listing?.zip || "";
@@ -141,6 +307,7 @@ export async function buildListingPageData(body = {}, req = null) {
     priceChangesResult,
     openHousesResult,
     marketTrendResult,
+    saleSearchResult,
   ] = await Promise.allSettled([
     fetchJson("/api/listingPhotos", { id, type, brd }),
     fetchJson("/api/get_comps", { id, status }),
@@ -158,6 +325,12 @@ export async function buildListingPageData(body = {}, req = null) {
           area_slug,
           munc_slug,
           comm_slug,
+        })
+      : Promise.resolve(null),
+    isLeaseListing(listing) && listing?.addr
+      ? fetchJson("/api/main_search/", {
+          q: [listing.addr, listing.municipality].filter(Boolean).join(", "),
+          s_r: "Sale",
         })
       : Promise.resolve(null),
   ]);
@@ -200,6 +373,28 @@ export async function buildListingPageData(body = {}, req = null) {
       : [];
 
   const heroImage = photos?.[0]?.src || listing?.thumbnail || null;
+  const propertyPairs = enrichment?.propertyPairs || {};
+  const detailPairs = enrichment?.detailPairs || {};
+  const entityAi = enrichment?.entityAi || {};
+
+  const bedsDisplay =
+    pickPair(detailPairs, "Bedrooms") ||
+    (listing?.br != null
+      ? `${listing.br}${listing?.br_plus ? "+" : ""}`
+      : null);
+  const bathsDisplay =
+    pickPair(detailPairs, "Bathrooms") || listing?.bath_tot || null;
+  const basement =
+    pickPair(propertyPairs, "Basement") ||
+    [listing?.bsmt1_out, listing?.bsmt2_out].filter(Boolean).join(" ") ||
+    entityAi?.basement ||
+    null;
+
+  const saleHit = pickSaleHitFromSearch(
+    listing,
+    saleSearchResult.status === "fulfilled" ? saleSearchResult.value : null,
+  );
+  const heroPrice = resolveHeroPrice(listing, saleHit);
 
   return {
     success: true,
@@ -209,35 +404,116 @@ export async function buildListingPageData(body = {}, req = null) {
       subtitle:
         [listing?.community, listing?.municipality].filter(Boolean).join(" • ") ||
         null,
-      price: listing?.lp_dol || null,
-      priceText: listing?.lp_dol_text || null,
+      price: heroPrice.price,
+      priceText: heroPrice.priceText,
+      priceKind: heroPrice.priceKind,
+      priceLabel: heroPrice.priceLabel,
+      leasePriceText: heroPrice.leasePriceText,
+      nativePrice: heroPrice.nativePrice,
+      nativePriceText: heroPrice.nativePriceText,
+      nativeKind: heroPrice.nativeKind,
       status: statusLabel(listing?.status),
       statusCode: listing?.status || null,
-      beds: listing?.br || null,
-      baths: listing?.bath_tot || null,
-      sqft: listing?.sqft || null,
-      propertyType: listing?.sub_type2 || listing?.sub_type || null,
+      beds: bedsDisplay || listing?.br || null,
+      baths: bathsDisplay || listing?.bath_tot || null,
+      sqft: listing?.sqft || entityAi?.size || null,
+      propertyType:
+        pickPair(propertyPairs, "Property Type") ||
+        listing?.type_own1_out ||
+        listing?.sub_type2 ||
+        listing?.sub_type ||
+        null,
       heroImage,
       photos,
       badges: listing?.badges1 || [],
     },
     details: {
-      mlsId: listing?.id || null,
-      propertyType: listing?.sub_type2 || null,
+      mlsId:
+        pickPair(propertyPairs, "MLS#", "MLS") || listing?.id || null,
+      propertyType:
+        pickPair(propertyPairs, "Property Type") ||
+        listing?.type_own1_out ||
+        listing?.sub_type2 ||
+        null,
       propertyClass: listing?.sub_type || null,
-      propertyStyle: listing?.style || null,
-      status: statusLabel(listing?.status),
-      exterior: listing?.exterior || null,
-      yearBuilt: listing?.age || null,
-      lotWidth: listing?.lot_width || null,
-      lotDepth: listing?.lot_depth || null,
-      taxes: listing?.taxes || null,
+      propertyStyle:
+        pickPair(propertyPairs, "Property Style") ||
+        listing?.style ||
+        entityAi?.style ||
+        null,
+      area:
+        pickPair(propertyPairs, "Area") ||
+        listing?.area ||
+        entityAi?.area ||
+        null,
+      community:
+        pickPair(propertyPairs, "Community") ||
+        listing?.community ||
+        entityAi?.community ||
+        null,
+      status:
+        pickPair(propertyPairs, "Status") || statusLabel(listing?.status),
+      exterior:
+        pickPair(propertyPairs, "Outside") ||
+        listing?.constr1_out ||
+        listing?.exterior ||
+        null,
+      yearBuilt:
+        pickPair(propertyPairs, "Year Built") ||
+        listing?.yr_built ||
+        listing?.age ||
+        entityAi?.yearBuilt ||
+        null,
+      basement,
+      brokerage:
+        pickPair(propertyPairs, "Brokerage") || listing?.rltr || null,
+      lotWidth:
+        pickPair(propertyPairs, "Lot Frontage") ||
+        listing?.front_ft ||
+        listing?.lot_width ||
+        null,
+      lotDepth:
+        pickPair(propertyPairs, "Lot Depth") ||
+        listing?.depth ||
+        listing?.lot_depth ||
+        null,
+      taxes:
+        pickPair(propertyPairs, "Taxes") || listing?.taxes || null,
+      taxYear: listing?.yr || null,
+      added: pickPair(propertyPairs, "Added") || listing?.ld || null,
       maintenance: listing?.maint || null,
-      parking: listing?.gar_spaces || null,
-      pool: listing?.pool || null,
-      crossStreet: listing?.cross_st || null,
+      parking:
+        listing?.gar_spaces ||
+        listing?.tot_park_spcs ||
+        entityAi?.totalParkingSpaces ||
+        null,
+      pool: listing?.pool || entityAi?.poolAvailability || null,
+      crossStreet:
+        pickPair(detailPairs, "Intersection") ||
+        listing?.cross_st ||
+        null,
+      roomsCount: pickPair(detailPairs, "Rooms") || listing?.rms || null,
+      beds: bedsDisplay,
+      baths: bathsDisplay,
+      fireplace: pickPair(detailPairs, "Fireplace") || listing?.fpl_num || null,
+      water: pickPair(detailPairs, "Water") || listing?.water || null,
+      cooling:
+        pickPair(detailPairs, "Cooling") ||
+        listing?.a_c ||
+        entityAi?.airCondition ||
+        null,
+      heating:
+        pickPair(detailPairs, "Heating Type") ||
+        listing?.heating ||
+        entityAi?.heating ||
+        null,
+      heatingFuel:
+        pickPair(detailPairs, "Heating Fuel") || listing?.fuel || null,
       saleType: listing?.s_r || null,
       features: extractFeatures(listing),
+      rooms: listing?.rooms || enrichment?.rooms || [],
+      adText: listing?.ad_text || enrichment?.ad_text || null,
+      extras: listing?.extras || enrichment?.extras || null,
     },
     calculator: {
       inputs: {
@@ -271,10 +547,11 @@ export async function buildListingPageData(body = {}, req = null) {
     neighborhood: {
       lat: listing?.lat || null,
       lng: listing?.lng || null,
-      walkscore: listing?.walkscore || null,
       municipality: listing?.municipality || null,
       community: listing?.community || null,
       area: listing?.area || null,
+      vibe: enrichment?.neighborhoodVibe || null,
+      walkscore: enrichment?.walkscore || null,
     },
     comparisons: {
       active: activeComparisons,

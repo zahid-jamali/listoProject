@@ -1,6 +1,16 @@
 import { NextResponse } from "next/server";
 
-export const LISTO_BASE_URL = "https://listo.ca";
+/** Upstream Listo API — set LISTO_API_BASE_URL=http://localhost:8080 for local legacy */
+let rawBaseUrl =
+  process.env.LISTO_API_BASE_URL ||
+  process.env.LEGACY_API_URL ||
+  "https://listo.ca";
+
+if (rawBaseUrl.startsWith("http://listo.ca")) {
+  rawBaseUrl = rawBaseUrl.replace("http://listo.ca", "https://listo.ca");
+}
+
+export const LISTO_BASE_URL = rawBaseUrl;
 
 export const DEFAULT_HEADERS = {
   Referer: `${LISTO_BASE_URL}/`,
@@ -38,11 +48,51 @@ export function buildForwardHeaders(req, extraHeaders = {}) {
   // Pehle default headers set karein
   const headers = { ...DEFAULT_HEADERS, ...extraHeaders };
 
-  const authHeader = req?.headers?.get("authorization");
+  // Forward incoming User-Agent and Client Hints to bypass bot protection / WAF mismatch checks
+  const userAgent = req?.headers?.get("user-agent") || req?.headers?.get("User-Agent");
+  if (userAgent) headers["User-Agent"] = userAgent;
+
+  const acceptLang = req?.headers?.get("accept-language") || req?.headers?.get("Accept-Language");
+  if (acceptLang) headers["Accept-Language"] = acceptLang;
+
+  const secChUa = req?.headers?.get("sec-ch-ua");
+  if (secChUa) headers["sec-ch-ua"] = secChUa;
+
+  const secChUaMobile = req?.headers?.get("sec-ch-ua-mobile");
+  if (secChUaMobile) headers["sec-ch-ua-mobile"] = secChUaMobile;
+
+  const secChUaPlatform = req?.headers?.get("sec-ch-ua-platform");
+  if (secChUaPlatform) headers["sec-ch-ua-platform"] = secChUaPlatform;
+
+  // Remove Origin header for GET requests to prevent triggering CSRF checks on public routes
+  const method = req?.method || "GET";
+  if (method.toUpperCase() === "GET") {
+    delete headers.Origin;
+  }
+
+  const authHeader = req?.headers?.get("authorization") || req?.headers?.get("Authorization");
   if (authHeader) headers.Authorization = authHeader;
 
-  const cookieHeader = req?.headers?.get("cookie");
-  if (cookieHeader) headers.Cookie = cookieHeader;
+  const incomingCookie = req?.headers?.get("cookie") || req?.headers?.get("Cookie") || "";
+
+  // Extract only the auth_user cookie if present
+  let authUserCookie = "";
+  const match = incomingCookie.match(/(?:^|; )auth_user=([^;]*)/);
+  if (match) {
+    authUserCookie = `auth_user=${match[1]}`;
+  }
+
+  // If we have Authorization header, but no auth_user cookie yet, construct one
+  if (authHeader && !authUserCookie) {
+    const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+    if (token) {
+      authUserCookie = `auth_user=${token}`;
+    }
+  }
+
+  if (authUserCookie) {
+    headers.Cookie = authUserCookie;
+  }
 
   headers["X-Forwarded-For"] = "";
   headers["X-Real-IP"] = "";
@@ -247,9 +297,12 @@ export async function proxyListoGet(req, options) {
       forwardRemainingParams(upstream, searchParams, excluded);
     }
 
-    const res = await fetch(upstream.toString(), {
+    const targetUrl = upstream.toString();
+    const targetHeaders = buildForwardHeaders(req);
+
+    const res = await fetch(targetUrl, {
       method: "GET",
-      headers: buildForwardHeaders(req),
+      headers: targetHeaders,
       cache: "no-store",
     });
 

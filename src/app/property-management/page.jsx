@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const services = [
   {
     title: "Property Management",
@@ -44,7 +46,7 @@ const services = [
 
 export default function PropertyManagementPage() {
   return (
-    <main className="bg-[#F4F4F4] ">
+    <main className="bg-[#F4F4F4]">
       <HeroSection />
       <ServicesSection />
       <OntarioSection />
@@ -58,15 +60,17 @@ function HeroSection() {
     <section className="relative h-[520px] overflow-hidden">
       <img
         src="/assets/p-m-1.png"
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover pt-"
+        alt="Property Management"
+        className="absolute inset-0 h-full w-full object-cover"
       />
 
       <div className="absolute inset-0 bg-black/50" />
 
-      <div className="relative z-10 p-20 flex h-full items-center justify-center px-6">
+      <div className="relative z-10 p-6 sm:p-20 flex h-full items-center justify-center">
         <div className="max-w-4xl text-center text-white">
-          <h1 className="text-5xl font-black">Property Management</h1>
+          <h1 className="text-4xl sm:text-5xl font-black">
+            Property Management
+          </h1>
 
           <p className="mt-4 text-[#F58233] font-semibold">
             Our local teams manage your property and tenants with care.
@@ -74,7 +78,7 @@ function HeroSection() {
 
           <p className="mx-auto mt-6 max-w-3xl text-[15px] leading-7 text-gray-200">
             Listo provides property management solutions that eliminate property
-            hassles and owners can simply earn returns without stress.
+            hassles so owners can simply earn returns without stress.
           </p>
 
           <p className="mx-auto mt-3 max-w-3xl text-[15px] leading-7 text-gray-300">
@@ -144,48 +148,52 @@ function OntarioSection() {
   return (
     <section className="bg-[#F4F4F4] py-24">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="grid items-center gap-14 lg:grid-cols-2">
+        <div className="grid items-center gap-10 lg:gap-14 lg:grid-cols-2">
           {/* IMAGE */}
-
           <div>
             <img
               src="/assets/p-m-2.png"
-              alt=""
-              className="h-[420px] w-full rounded-3xl object-cover shadow-xl"
+              alt="Ontario Property Management"
+              className="h-[260px] sm:h-[360px] lg:h-[420px] w-full rounded-3xl object-cover shadow-xl"
             />
           </div>
 
           {/* CONTENT */}
-
           <div>
-            <h2 className="text-5xl font-black text-[#02132D]">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#02132D]">
               Ontario is our home
             </h2>
 
-            <p className="mt-5 text-gray-600 leading-8">
+            <p className="mt-4 sm:mt-5 text-gray-600 leading-7 sm:leading-8 text-sm sm:text-base">
               Our local team in Ontario is dedicated to helping you maximize
               your rental investment while safeguarding your assets.
             </p>
 
-            <div className="mt-10 grid grid-cols-2 gap-4">
+            <div className="mt-8 sm:mt-10 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {features.map((feature) => (
                 <div
                   key={feature}
-                  className="rounded-xl border bg-white p-4 text-center font-medium shadow-sm"
+                  className="rounded-xl border bg-white p-3.5 sm:p-4 text-center text-xs sm:text-sm font-medium shadow-sm"
                 >
                   {feature}
                 </div>
               ))}
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-4">
-              <button className="rounded-full bg-[#F58233] px-6 py-3 font-semibold text-white">
+            <div className="mt-8 flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
+              <Link
+                href="/contact-us"
+                className="inline-flex items-center justify-center rounded-full bg-[#F58233] px-6 py-3 font-semibold text-white transition hover:opacity-90 text-sm"
+              >
                 Get In Touch
-              </button>
+              </Link>
 
-              <button className="rounded-full bg-[#02132D] px-6 py-3 font-semibold text-white">
+              <Link
+                href="/home-and-condos-for-investment"
+                className="inline-flex items-center justify-center rounded-full bg-[#02132D] px-6 py-3 font-semibold text-white transition hover:opacity-90 text-sm"
+              >
                 Investment Properties
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -196,22 +204,25 @@ function OntarioSection() {
 
 function BottomCTA() {
   return (
-    <section className="pb-24">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="overflow-hidden rounded-[28px] bg-[#02132D] px-10 py-10 text-center shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
-          <h2 className="text-4xl font-black text-white">
+    <section className="pb-16 sm:pb-24">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="overflow-hidden rounded-[24px] sm:rounded-[28px] bg-[#02132D] px-5 py-8 sm:px-10 sm:py-10 text-center shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white">
             More time for yourself and less stress as your wealth grows 🏡
           </h2>
 
-          <p className="mx-auto mt-5 max-w-3xl text-gray-300">
+          <p className="mx-auto mt-4 sm:mt-5 max-w-3xl text-sm sm:text-base text-gray-300">
             Let our experienced property management team handle maintenance,
             tenant relations, inspections, rent collection, and reporting while
             you focus on growing your portfolio.
           </p>
 
-          <button className="mt-8 rounded-full bg-[#F58233] px-8 py-3 font-semibold text-white">
+          <Link
+            href="/contact-us"
+            className="mt-6 sm:mt-8 inline-flex items-center justify-center rounded-full bg-[#F58233] px-8 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+          >
             Schedule a Consultation
-          </button>
+          </Link>
         </div>
       </div>
     </section>

@@ -306,7 +306,7 @@ export default function PreConstructionSection() {
               variants={fadeUp}
               whileHover={{ y: -6 }}
             >
-              <Link href={`/preconstruction/${project.href}`}>
+              <Link href={`/pre-construction/${project.href}`}>
                 <div className="overflow-hidden rounded-[32px] border border-[#E5E7EB] bg-white shadow-[0_10px_35px_rgba(0,0,0,0.05)] hover:shadow-[0_25px_60px_rgba(0,0,0,0.10)]">
                   <div className="relative h-[220px] overflow-hidden">
                     <img
@@ -355,11 +355,11 @@ export default function PreConstructionSection() {
           ))}
         </div>
 
-        <div className="mt-12 flex justify-center">
+        {/* <div className="mt-12 flex justify-center">
           <button className="rounded-2xl bg-[#081A3A] px-7 py-3 text-sm font-semibold text-white hover:bg-[#102752]">
             Browse by Developer
           </button>
-        </div>
+        </div> */}
       </div>
 
       <div className="mt-20 bg-white py-16">

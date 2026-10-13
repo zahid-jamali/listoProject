@@ -12,21 +12,21 @@ const reels = [
     id: 1,
     title: "Whitby 3 Bed 2 Bath $637,830",
     category: "Home Tour",
-    thumbnail: "/assets/reel1.jpg",
+    thumbnail: "/assets/reel1.png",
     video: "/assets/reel1.mp4",
   },
   {
     id: 2,
     title: "Scarborough 4 Bed 2 Bath $749,888",
     category: "Home Tour",
-    thumbnail: "/assets/reel2.jpg",
+    thumbnail: "/assets/reel2.png",
     video: "/assets/reel2.mp4",
   },
   {
     id: 3,
     title: "Dubai Property Sobha",
     category: "Pre-Construction",
-    thumbnail: "/assets/reel3.jpg",
+    thumbnail: "/assets/reel3.png",
     video: "/assets/reel3.mp4",
   },
 ];
@@ -49,7 +49,7 @@ export default function PropertyReels() {
             </div>
 
             <Link
-              href="/reels"
+              href="/trending"
               className="hidden items-center gap-2 text-[15px] font-semibold text-[#F58233] transition-all duration-300 hover:gap-3 md:flex"
             >
               View All
@@ -65,7 +65,7 @@ export default function PropertyReels() {
           </div>
 
           {/* MOBILE BUTTON */}
-          <div className="mt-10 flex justify-center md:hidden">
+          {/* <div className="mt-10 flex justify-center md:hidden">
             <Link
               href="/reels"
               className="flex items-center gap-2 rounded-xl border border-[#F58233] px-6 py-3 text-[15px] font-semibold text-[#F58233]"
@@ -73,7 +73,7 @@ export default function PropertyReels() {
               View All
               <ChevronRight size={16} />
             </Link>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>

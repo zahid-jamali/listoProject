@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 const cards = [
   {
@@ -9,6 +10,7 @@ const cards = [
       "Browse live MLS listings across the GTA and get matched with a LISTO advisor who knows your neighbourhood.",
     button: "Start your search",
     image: "/assets/buy.png",
+    href: "/real-estate-for-new-buyers",
   },
   {
     title: "Rent",
@@ -16,6 +18,7 @@ const cards = [
       "Verified condo, house and basement rentals — updated daily with transparent pricing.",
     button: "Browse rentals",
     image: "/assets/rent.png",
+    href: "/real-estate-listings?s_r=Lease",
   },
   {
     title: "Pre-Construction",
@@ -23,6 +26,7 @@ const cards = [
       "Platinum-access pricing on upcoming towers, towns and detached projects before public release.",
     button: "View launches",
     image: "/assets/preconstruction.png",
+    href: "/pre-construction-projects-by-area",
   },
   {
     title: "Sell",
@@ -30,6 +34,7 @@ const cards = [
       "Professional marketing, pricing intelligence and local expertise to maximize value.",
     button: "Get home value",
     image: "/assets/sell.png",
+    href: "/sell-with-listo",
   },
 ];
 
@@ -123,11 +128,11 @@ export default function PropertyCards() {
                 <p className="mt-3 flex-1 text-sm leading-6 text-[#6B7280] sm:mt-4 sm:leading-7">
                   {card.description}
                 </p>
-
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="
+                <Link href={`${card.href}`}>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="
                     mt-5
                     h-11 sm:h-12
                     w-full
@@ -139,9 +144,10 @@ export default function PropertyCards() {
                     hover:bg-[#F97316]
                     hover:text-white
                   "
-                >
-                  {card.button}
-                </motion.button>
+                  >
+                    {card.button}
+                  </motion.button>
+                </Link>
               </div>
             </motion.div>
           ))}

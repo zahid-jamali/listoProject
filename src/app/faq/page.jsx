@@ -1,38 +1,39 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import Link from "next/link";
+import { ChevronDown, PhoneCall, Mail } from "lucide-react";
 
 const faqs = [
   {
     question: "What is the minimum down payment in Ontario?",
     answer:
-      "For homes up to $500,000, the minimum down payment is 5%. For homes between $500,000 and $999,999, it's 5% on the first $500k and 10% on the remainder. Homes over $1 million require 20% down.",
+      "For homes up to $500,000, the minimum down payment is 5%. For homes between $500,000 and $1,499,999, it is 5% on the first $500,000 and 10% on the remaining portion. Homes priced at $1.5 million or more require a minimum 20% down payment.",
   },
   {
-    question: "How can I get my listing featured?",
+    question: "How can I get my listing featured on LISTO?",
     answer:
-      "Featured listings receive enhanced visibility across our platform. Contact our team to discuss available promotional opportunities.",
+      "Featured listings receive priority placement across our homepage, city search results, and investor feeds. Contact our brokerage team or visit our Advertise page to learn about promotional packages.",
   },
   {
-    question: "What are the Developer listings?",
+    question: "What are Developer & Pre-Construction listings?",
     answer:
-      "Developer listings showcase pre-construction and new development opportunities directly from builders and developers.",
+      "Developer listings showcase upcoming pre-construction condo, townhome, and detached developments directly from builders across Ontario, complete with floor plans, deposit structures, and VIP pricing.",
   },
   {
     question: "How does Listo manage Co-Ownership requests?",
     answer:
-      "Listo helps connect interested buyers and facilitates the co-ownership process through trusted partners and legal professionals.",
+      "Listo connects compatible buyers and facilitates the co-ownership journey through experienced real estate advisors, mortgage specialists, and legal professionals.",
   },
   {
     question: "When can I list my assignment deal?",
     answer:
-      "Assignment listings can be submitted once the builder's agreement permits assignment sales and all required documentation is available.",
+      "Assignment listings can be submitted as soon as your builder's Purchase and Sale Agreement permits assignment sales and all required builder consents and documentation are ready.",
   },
   {
     question: "What are the New Buyers Tools?",
     answer:
-      "Our tools include affordability calculators, mortgage estimators, rebate guides, closing cost calculators and market insights.",
+      "Our New Buyers suite includes interactive 'What Can I Buy' and 'Where Can I Buy' budget matchers, mortgage & closing cost calculators, Ontario rebate guides, and live community market statistics.",
   },
 ];
 
@@ -44,34 +45,27 @@ export default function FAQPage() {
   };
 
   return (
-    <main className="bg-[#F5F5F5] py-14 mt-20">
+    <main className="bg-[#F5F5F5] py-14 mt-20 min-h-screen">
       <div className="mx-auto max-w-4xl px-5">
         {/* TOP INFO */}
-
         <section>
-          <h1 className="text-[40px] font-black tracking-[-1px] text-[#02132D]">
-            Browse Real Estate by Location
+          <span className="inline-flex rounded-full bg-[#F58233]/10 border border-[#F58233]/30 px-3.5 py-1 text-xs font-semibold text-[#F58233]">
+            Help Center
+          </span>
+          <h1 className="mt-3 text-[36px] sm:text-[42px] font-black tracking-[-1px] text-[#02132D]">
+            Frequently Asked Questions
           </h1>
 
-          <div className="mt-5 rounded-2xl border border-[#D8D8D8] bg-white px-7 py-5 shadow-[0_4px_12px_rgba(0,0,0,0.12)]">
+          <div className="mt-5 rounded-2xl border border-[#D8D8D8] bg-white px-7 py-5 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
             <p className="text-[14px] leading-6 text-[#4B5563]">
-              Explore real estate listings by location to find your ideal home,
-              condo, or rental property. Our platform provides detailed insights
-              into property prices and market trends, making it easy to browse
-              and compare options. Whether buying, renting, or investing, access
-              up-to-date statistics to make informed decisions.
+              Have questions about buying, selling, pre-construction projects, or real estate investing in Ontario? Browse our most common questions below or reach out directly to a LISTO advisor for personalized guidance.
             </p>
           </div>
         </section>
 
-        {/* FAQ HEADING */}
-
-        <section className="mt-20">
-          <h2 className="text-center text-[36px] font-black text-[#02132D]">
-            Frequently Asked Questions
-          </h2>
-
-          <div className="mt-10 space-y-4">
+        {/* FAQ ACCORDION */}
+        <section className="mt-12">
+          <div className="space-y-4">
             {faqs.map((faq, index) => (
               <FAQItem
                 key={index}
@@ -84,16 +78,34 @@ export default function FAQPage() {
         </section>
 
         {/* CONTACT BOX */}
-
         <section className="mt-10">
-          <div className="rounded-2xl border border-[#D8D8D8] bg-white px-7 py-6 shadow-[0_4px_12px_rgba(0,0,0,0.12)]">
-            <p className="text-[15px] italic text-[#374151]">
-              Didn't find what you were looking for? Please call us at
-            </p>
+          <div className="rounded-2xl border border-[#D8D8D8] bg-white px-7 py-6 shadow-[0_4px_12px_rgba(0,0,0,0.08)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <p className="text-[15px] font-semibold text-[#02132D]">
+                Didn&apos;t find what you were looking for?
+              </p>
+              <p className="mt-1 text-sm text-[#4B5563] flex flex-wrap items-center gap-4">
+                <a
+                  href="tel:+19057571234"
+                  className="inline-flex items-center gap-1.5 text-[#F58233] font-medium hover:underline"
+                >
+                  <PhoneCall size={14} /> (905) 757-1234
+                </a>
+                <a
+                  href="mailto:info@listo.ca"
+                  className="inline-flex items-center gap-1.5 text-[#F58233] font-medium hover:underline"
+                >
+                  <Mail size={14} /> info@listo.ca
+                </a>
+              </p>
+            </div>
 
-            <button className="mt-4 rounded-full bg-[#F58233] px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90">
+            <Link
+              href="/contact-us"
+              className="inline-flex items-center justify-center rounded-full bg-[#F58233] px-6 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 shrink-0"
+            >
               Contact Us
-            </button>
+            </Link>
           </div>
         </section>
       </div>
@@ -105,6 +117,7 @@ function FAQItem({ faq, isOpen, onClick }) {
   return (
     <div className="overflow-hidden rounded-xl border border-[#D8D8D8] bg-white shadow-sm">
       <button
+        type="button"
         onClick={onClick}
         className="flex w-full items-center justify-between px-6 py-5 text-left"
       >
@@ -114,8 +127,8 @@ function FAQItem({ faq, isOpen, onClick }) {
 
         <ChevronDown
           size={18}
-          className={`transition-transform duration-300 ${
-            isOpen ? "rotate-180" : ""
+          className={`transition-transform duration-300 shrink-0 ml-3 ${
+            isOpen ? "rotate-180 text-[#F58233]" : ""
           }`}
         />
       </button>

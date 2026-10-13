@@ -14,41 +14,41 @@ export default function AdvertisementBanner() {
           <img
             src="/assets/ad-banner.png" // set your image path
             alt="Advertisement Banner"
-            className="h-[240px] w-full object-cover sm:h-[320px] lg:h-[420px]"
+            className="min-h-[260px] sm:min-h-[320px] lg:h-[420px] w-full object-cover"
           />
 
           {/* OVERLAY */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-black/10" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-black/20" />
 
           {/* AD TAG */}
-          <div className="absolute right-5 top-5 rounded-full bg-white px-3 py-1 text-[11px] font-bold tracking-wide text-black shadow-md">
+          <div className="absolute right-4 top-4 sm:right-5 sm:top-5 rounded-full bg-white px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-[11px] font-bold tracking-wide text-black shadow-md">
             AD
           </div>
 
           {/* CONTENT */}
           <div className="absolute inset-0 flex items-end">
-            <div className="p-6 sm:p-10 lg:p-14">
+            <div className="p-5 sm:p-10 lg:p-14">
               {/* SPONSORED */}
-              <p className="text-[11px] font-semibold uppercase tracking-[2px] text-white/70">
+              <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[2px] text-white/70">
                 Sponsored
               </p>
 
               {/* TITLE */}
-              <h2 className="mt-3 max-w-[520px] text-[30px] font-extrabold leading-[38px] tracking-[-1px] text-white sm:text-[42px] sm:leading-[50px] lg:text-[54px] lg:leading-[62px]">
+              <h2 className="mt-1.5 sm:mt-3 max-w-[520px] text-2xl font-extrabold leading-tight tracking-[-0.02em] text-white sm:text-[42px] sm:leading-[50px] lg:text-[54px] lg:leading-[62px]">
                 Your ad could live here
               </h2>
 
               {/* DESCRIPTION */}
-              <p className="mt-4 max-w-[520px] text-[14px] leading-[26px] text-white/80 sm:text-[16px]">
+              <p className="mt-2 sm:mt-4 max-w-[520px] text-xs leading-5 text-white/85 sm:text-[16px] sm:leading-[26px]">
                 Reach thousands of Canadian home buyers every day on LISTO.
               </p>
 
               {/* BUTTON */}
               <Link
                 href="/advertise"
-                className="mt-6 inline-flex items-center rounded-full bg-[#F58233] px-6 py-3 text-[14px] font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-[#e46f1d]"
+                className="mt-4 sm:mt-6 inline-flex items-center rounded-full bg-[#F58233] px-5 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-[14px] font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-[#e46f1d]"
               >
-                Advertise with us ↗
+                Advertise
               </Link>
             </div>
           </div>

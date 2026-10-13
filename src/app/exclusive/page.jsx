@@ -2,7 +2,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 import {
   Mail,
   Phone,
@@ -36,13 +38,28 @@ export default function ExclusiveListingsPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      // Simulate API call - Replace with your actual endpoint
-      await new Promise((r) => setTimeout(r, 1500));
+      const res = await fetch("/api/contactus", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          msg: `[Exclusive Listings Inquiry] ${formData.message}`,
+          purpose: "INVESTMENT",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.success === false) {
+        throw new Error(data.message || "Failed to send message");
+      }
       setSubmitted(true);
+      toast.success("Your inquiry has been sent! Our team will contact you shortly.");
       setFormData({ name: "", phone: "", email: "", message: "" });
-      setTimeout(() => setSubmitted(false), 3000);
+      setTimeout(() => setSubmitted(false), 4000);
     } catch (error) {
       console.error("Form submission error:", error);
+      toast.error(error.message || "Could not send message. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -189,21 +206,19 @@ export default function ExclusiveListingsPage() {
             </p>
 
             <div className="mt-6 sm:mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
-              <motion.button
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                className="rounded-2xl bg-gradient-to-r from-[#F36B22] to-orange-500 px-5 py-3 sm:px-7 sm:py-4 text-sm sm:text-base font-semibold text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              <Link
+                href="/real-estate-listings"
+                className="rounded-2xl bg-gradient-to-r from-[#F36B22] to-orange-500 px-5 py-3 sm:px-7 sm:py-4 text-sm sm:text-base font-semibold text-white shadow-lg hover:shadow-xl transition-all duration-300 inline-flex items-center justify-center"
               >
                 Explore Listings →
-              </motion.button>
+              </Link>
 
-              <motion.button
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                className="rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-sm px-5 py-3 sm:px-7 sm:py-4 text-sm sm:text-base font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-300"
+              <a
+                href="#how-it-works"
+                className="rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-sm px-5 py-3 sm:px-7 sm:py-4 text-sm sm:text-base font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-300 inline-flex items-center justify-center"
               >
                 Learn More
-              </motion.button>
+              </a>
             </div>
           </div>
 
@@ -276,11 +291,6 @@ export default function ExclusiveListingsPage() {
                 whileHover={{ y: -6 }}
                 className="group rounded-2xl sm:rounded-3xl border border-slate-100 bg-white p-5 sm:p-7 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer"
               >
-                {/* <div
-                  className={`text-3xl sm:text-4xl mb-3 sm:mb-4 p-3 rounded-2xl ${feature.color} inline-block group-hover:scale-110 transition-transform`}
-                >
-                  {feature.icon}
-                </div> */}
                 <h3 className="text-lg sm:text-xl font-bold text-slate-900 group-hover:text-[#F36B22] transition-colors">
                   {feature.title}
                 </h3>
@@ -294,10 +304,11 @@ export default function ExclusiveListingsPage() {
 
         {/* How It Works */}
         <motion.section
+          id="how-it-works"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="mt-20 sm:mt-24 lg:mt-32"
+          className="mt-20 sm:mt-24 lg:mt-32 scroll-mt-24"
         >
           <div className="text-center">
             <span className="text-xs sm:text-sm font-bold text-[#F36B22] uppercase tracking-wider">
@@ -388,14 +399,13 @@ export default function ExclusiveListingsPage() {
                 </div>
               ))}
             </div>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <Link
+              href="/real-estate-listings"
               className="mt-6 sm:mt-8 inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 sm:px-7 sm:py-4 text-sm sm:text-base font-semibold text-white hover:bg-slate-800 transition-all duration-300"
             >
               Active Exclusive Listings
               <ArrowRight size={18} />
-            </motion.button>
+            </Link>
           </div>
         </motion.section>
 
@@ -417,26 +427,26 @@ export default function ExclusiveListingsPage() {
               Access Buyers Before Anyone Else
             </h2>
             <p className="mt-3 sm:mt-5 text-base sm:text-lg text-white/80 max-w-2xl">
-              Join Listo's private marketplace and connect with serious buyers
+              Join Listo&apos;s private marketplace and connect with serious buyers
               looking for premium opportunities.
             </p>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="mt-6 sm:mt-8 rounded-2xl bg-gradient-to-r from-[#F36B22] to-orange-500 px-6 sm:px-8 py-3 sm:py-4 font-semibold text-white shadow-lg hover:shadow-xl transition-all duration-300"
+            <a
+              href="#exclusive-contact"
+              className="mt-6 sm:mt-8 inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-[#F36B22] to-orange-500 px-6 sm:px-8 py-3 sm:py-4 font-semibold text-white shadow-lg hover:shadow-xl transition-all duration-300"
             >
               Join Now →
-            </motion.button>
+            </a>
           </div>
         </motion.section>
 
         {/* Contact Section */}
         <motion.section
+          id="exclusive-contact"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
           variants={staggerContainer}
-          className="mt-16 sm:mt-20 lg:mt-28 grid gap-5 sm:gap-6 lg:gap-8 md:grid-cols-2 xl:grid-cols-[360px_1fr]"
+          className="mt-16 sm:mt-20 lg:mt-28 grid gap-5 sm:gap-6 lg:gap-8 md:grid-cols-2 xl:grid-cols-[360px_1fr] scroll-mt-24"
         >
           {/* Contact Info Card */}
           <motion.div

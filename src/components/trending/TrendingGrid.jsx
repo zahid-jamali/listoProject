@@ -4,7 +4,13 @@ import { useEffect, useState } from "react";
 import TrendingCard from "./TrendingCard";
 import Pagination from "./Pagination";
 
-export default function TrendingGrid({ page, heading, crossLine }) {
+export default function TrendingGrid({
+  page,
+  heading,
+  crossLine,
+  sort = "dom_calc",
+  order = "asc",
+}) {
   const [listings, setListings] = useState([]);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -12,27 +18,34 @@ export default function TrendingGrid({ page, heading, crossLine }) {
   const LIMIT = 9;
 
   useEffect(() => {
-    fetchData();
-  }, [page]);
+    let cancelled = false;
 
-  async function fetchData() {
-    try {
-      setLoading(true);
+    async function fetchData() {
+      try {
+        setLoading(true);
 
-      const res = await fetch(
-        `/api/listings?type=RS&page=${page}&limit=${LIMIT}&sort=dom_calc`,
-      );
+        const offset = Math.max(0, (Number(page) - 1) * LIMIT);
+        const res = await fetch(
+          `/api/listings?type=RS&limit=${LIMIT}&offset=${offset}&sort=${encodeURIComponent(sort)}&order=${encodeURIComponent(order)}`,
+        );
 
-      const data = await res.json();
+        const data = await res.json();
+        if (cancelled) return;
 
-      setListings(data.rows || []);
-      setCount(data.count || 0);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+        setListings(data.rows || []);
+        setCount(Number(data.total || data.count || 0));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     }
-  }
+
+    fetchData();
+    return () => {
+      cancelled = true;
+    };
+  }, [page, sort, order]);
 
   const totalPages = Math.ceil(count / LIMIT);
 

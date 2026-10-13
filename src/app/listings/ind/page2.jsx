@@ -1,18 +1,27 @@
 "use client";
 
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import {
-  Lock,
   BedDouble,
   Bath,
   Ruler,
-  Trees,
-  School,
-  Bus,
-  Bike,
   MapPin,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Phone,
+  Mail,
+  Share2,
+  Heart,
+  Trees,
+  Bus,
+  Bike,
+  ArrowLeft,
+  ImageIcon,
 } from "lucide-react";
-
 import {
   ResponsiveContainer,
   LineChart,
@@ -23,815 +32,982 @@ import {
   Tooltip,
 } from "recharts";
 
-import { Home, ArrowUpRight } from "lucide-react";
+import toast from "react-hot-toast";
+import { encodeListingData, decodeListingData } from "@/lib/url-helper";
 
-export default function PropertyPage() {
-  const features = [
-    "Fenced Yard",
-    "Park",
-    "Public Transit",
-    "School",
-    "Rec./Comm. Centre",
-  ];
+const TABS = [
+  { id: "property", label: "Property" },
+  { id: "details", label: "Details" },
+  { id: "rooms", label: "Room Sizes" },
+];
 
-  const trendData = [
-    {
-      month: "NOV",
-      detached: 450,
-      semi: 450,
-      townhouse: 480,
-      condo: 630,
-    },
-    {
-      month: "DEC",
-      detached: 500,
-      semi: 500,
-      townhouse: 520,
-      condo: 570,
-    },
-    {
-      month: "JAN",
-      detached: 650,
-      semi: 600,
-      townhouse: 570,
-      condo: 530,
-    },
-    {
-      month: "FEB",
-      detached: 850,
-      semi: 650,
-      townhouse: 600,
-      condo: 490,
-    },
-    {
-      month: "MAR",
-      detached: 980,
-      semi: 700,
-      townhouse: 630,
-      condo: 460,
-    },
-    {
-      month: "APR",
-      detached: 1020,
-      semi: 740,
-      townhouse: 640,
-      condo: 440,
-    },
-  ];
+const TREND_LINES = [
+  { key: "detached_avg_sold_price", color: "#FF5C5C", label: "Detached" },
+  { key: "semi_detached_avg_sold_price", color: "#20C997", label: "Semi" },
+  {
+    key: "twnhouse_avg_sold_price",
+    color: "#3B82F6",
+    label: "Townhouse",
+  },
+  { key: "condo_apt_avg_sold_price", color: "#8B5CF6", label: "Condo" },
+];
+
+function formatCurrency(value) {
+  const num = Number(String(value || "").replace(/[^\d.-]/g, ""));
+  if (!Number.isFinite(num)) return value || "—";
+  return new Intl.NumberFormat("en-CA", {
+    style: "currency",
+    currency: "CAD",
+    maximumFractionDigits: 0,
+  }).format(num);
+}
+
+function statusBadgeClass(status) {
+  const normalized = String(status || "").toLowerCase();
+  if (normalized.includes("sold")) return "bg-slate-500";
+  if (normalized.includes("lease")) return "bg-blue-500";
+  return "bg-[#F58232]";
+}
+
+function ListingDetailContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [data, setData] = useState(null);
+  const [activeTab, setActiveTab] = useState("property");
+  const [photoIndex, setPhotoIndex] = useState(0);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [calculatorInputs, setCalculatorInputs] = useState(null);
+
+  const [favorites, setFavorites] = useState([]);
+
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem("favoriteListings")) || [];
+
+    setFavorites(stored);
+  }, []);
+
+  const toggleFavorite = (listing) => {
+    const stored = JSON.parse(localStorage.getItem("favoriteListings")) || [];
+
+    const exists = stored.find((item) => item.id === listing.id);
+
+    let updated;
+
+    if (exists) {
+      updated = stored.filter((item) => item.id !== listing.id);
+
+      toast.success("Removed from favorites");
+    } else {
+      updated = [...stored, listing];
+
+      toast.success("Added to favorites");
+    }
+
+    localStorage.setItem("favoriteListings", JSON.stringify(updated));
+
+    setFavorites(updated);
+  };
+
+  const handleShare = async (listing) => {
+    const shareUrl = `${window.location.origin}/listings/ind?p=${encodeListingData(listing)}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: listing.title,
+          text: listing.addr,
+          url: shareUrl,
+        });
+
+        toast.success("Listing shared");
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+
+        toast.success("Link copied to clipboard");
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const loadListing = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      let listing = null;
+      const p = searchParams.get("p");
+      const brd = searchParams.get("brd");
+
+      if (p) {
+        listing = decodeListingData(p);
+      } else if (typeof window !== "undefined") {
+        const stored = sessionStorage.getItem("listing");
+        if (stored) {
+          listing = JSON.parse(stored);
+        }
+      }
+
+      if (!listing) {
+        setError("No listing selected. Browse listings and choose a property.");
+        return;
+      }
+
+      const payload = brd ? { ...listing, brd } : listing;
+
+      const res = await fetch("/api/singleListing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const pageData = await res.json();
+
+      if (!pageData.success) {
+        setError(pageData.message || "Unable to load listing details.");
+        return;
+      }
+
+      setData(pageData);
+      setCalculatorInputs(pageData.calculator?.inputs || null);
+      sessionStorage.setItem("listing", JSON.stringify(pageData.property));
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong while loading this property.");
+    } finally {
+      setLoading(false);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    loadListing();
+  }, [loadListing]);
+
+  const photos = data?.hero?.photos || [];
+  const hero = data?.hero;
+  const details = data?.details;
+  const neighborhood = data?.neighborhood;
+  const activeComps = data?.comparisons?.active || [];
+  const soldComps = data?.comparisons?.sold || [];
+  const insights = data?.insights || [];
+
+  const chartData = useMemo(() => {
+    return (data?.marketTrends || [])
+      .slice(0, 6)
+      .reverse()
+      .map((item) => ({
+        month: new Date(item.date).toLocaleDateString("en-CA", {
+          month: "short",
+        }),
+        detached: Number(item.detached_avg_sold_price) / 1000 || 0,
+        semi: Number(item.semi_detached_avg_sold_price) / 1000 || 0,
+        townhouse: Number(item.twnhouse_avg_sold_price) / 1000 || 0,
+        condo: Number(item.condo_apt_avg_sold_price) / 1000 || 0,
+      }));
+  }, [data?.marketTrends]);
+
+  const calculatorResults = useMemo(() => {
+    if (!calculatorInputs) return data?.calculator?.results;
+
+    const homePrice = Number(calculatorInputs.homePrice) || 0;
+    const downPaymentPercent =
+      Number(calculatorInputs.downPaymentPercent) || 20;
+    const interestRate = Number(calculatorInputs.interestRate) || 5.4;
+    const termYears = Number(calculatorInputs.termYears) || 25;
+
+    const downPayment = homePrice * (downPaymentPercent / 100);
+    const loanAmount = homePrice - downPayment;
+    const monthlyRate = interestRate / 100 / 12;
+    const months = termYears * 12;
+    const mortgageMonthly =
+      monthlyRate === 0
+        ? loanAmount / months
+        : (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, months)) /
+          (Math.pow(1 + monthlyRate, months) - 1);
+    const propertyTaxMonthly = (homePrice * 0.004) / 12;
+    const estimatedMonthly = mortgageMonthly + propertyTaxMonthly;
+
+    return {
+      downPayment,
+      loanAmount,
+      mortgageMonthly,
+      propertyTaxMonthly,
+      closingCostsEstimate: homePrice * 0.0175,
+      estimatedMonthly,
+      affordabilityScore: data?.calculator?.results?.affordabilityScore,
+    };
+  }, [calculatorInputs, data?.calculator?.results]);
+
+  const mapUrl =
+    neighborhood?.lat && neighborhood?.lng
+      ? `https://maps.google.com/maps?q=${neighborhood.lat},${neighborhood.lng}&z=15&output=embed`
+      : null;
+
+  const openGallery = (index = 0) => {
+    setPhotoIndex(index);
+    setGalleryOpen(true);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f5f5]">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-14 w-14 animate-spin rounded-full border-4 border-[#F58232] border-t-transparent" />
+          <p className="text-sm font-medium text-slate-600">
+            Loading property details…
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f5f5] px-6">
+        <div className="max-w-md rounded-3xl bg-white p-10 text-center shadow-xl">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 text-[#F58232]">
+            <MapPin size={28} />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900">
+            Listing unavailable
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-slate-500">{error}</p>
+          <Link
+            href="/"
+            className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#081A3A] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#102752]"
+          >
+            <ArrowLeft size={16} />
+            Back to home
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
-      {/* Hero Section */}
-      <section className="w-full mx-auto">
-        <div className="relative h-[550px] rounded-xl overflow-hidden shadow-xl">
+      {galleryOpen && photos.length > 0 && (
+        <div className="fixed inset-0 z-50 flex  items-center justify-center bg-black/95">
+          <button
+            type="button"
+            onClick={() => setGalleryOpen(false)}
+            className="absolute right-5 top-5 rounded-full bg-white/10 p-2 text-white transition hover:bg-white/20"
+          >
+            <X size={24} />
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              setPhotoIndex(
+                (prev) => (prev - 1 + photos.length) % photos.length,
+              )
+            }
+            className="absolute left-5 rounded-full bg-white/10 p-2 text-white transition hover:bg-white/20"
+          >
+            <ChevronLeft size={28} />
+          </button>
           <img
-            src="https://images.unsplash.com/photo-1568605114967-8130f3a36994"
-            alt=""
-            className="w-full h-full object-cover"
+            src={photos[photoIndex]?.src}
+            alt={`${hero?.title} photo ${photoIndex + 1}`}
+            className="max-h-[88vh] max-w-[92vw] object-contain"
           />
-
-          <div className="absolute inset-0 bg-black/45" />
-
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="bg-black/55 backdrop-blur-md rounded-2xl p-8 w-[500px] text-center text-white">
-              <Lock className="mx-auto mb-4 text-orange-500" size={28} />
-
-              <h1 className="text-4xl font-bold mb-3">
-                69 Horseley Hill Drive
-              </h1>
-
-              <p className="text-gray-300 text-sm mb-6">
-                Local rules require an authorized account to access full
-                property details and historical pricing.
-              </p>
-
-              <div className="flex justify-center gap-4">
-                <button className="bg-orange-500 hover:bg-orange-600 transition px-6 py-3 rounded-full font-semibold">
-                  SIGN IN TO VIEW
-                </button>
-
-                <button className="bg-white/10 border border-white/20 px-6 py-3 rounded-full">
-                  PHOTO TOGGLE
-                </button>
-              </div>
-            </div>
+          <button
+            type="button"
+            onClick={() => setPhotoIndex((prev) => (prev + 1) % photos.length)}
+            className="absolute right-5 rounded-full bg-white/10 p-2 text-white transition hover:bg-white/20"
+          >
+            <ChevronRight size={28} />
+          </button>
+          <div className="absolute bottom-6 rounded-full bg-black/60 px-4 py-2 text-sm text-white">
+            {photoIndex + 1} / {photos.length}
           </div>
         </div>
+      )}
 
-        {/* Property Summary */}
-        <div className="bg-white max-w-6xl mx-auto  rounded-2xl shadow-xl -mt-10 relative z-10 px-10 py-8 flex flex-wrap justify-between items-center gap-8">
-          <div>
-            <h2 className="text-4xl font-bold">69 Horseley Hill Drive</h2>
+      <main className="min-h-screen bg-[#f5f5f5] py-20">
+        <section className="mx-auto max-w-7xl px-4 pt-6 lg:px-6">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-[#F58232]"
+          >
+            <ArrowLeft size={16} />
+            Back
+          </button>
 
-            <p className="text-gray-500 mt-2">Malvern Elite District</p>
-          </div>
-
-          <div>
-            <h3 className="text-4xl font-bold">$1,250,000</h3>
-
-            <p className="text-xs tracking-[4px] text-gray-500 mt-2">
-              LISTING PRICE
-            </p>
-          </div>
-
-          <div className="flex gap-10">
-            <div className="text-center">
-              <BedDouble className="mx-auto text-orange-500 mb-2" size={20} />
-              <h4 className="font-bold">5</h4>
-              <p className="text-xs text-gray-500">BEDS</p>
-            </div>
-
-            <div className="text-center">
-              <Bath className="mx-auto text-orange-500 mb-2" size={20} />
-              <h4 className="font-bold">4</h4>
-              <p className="text-xs text-gray-500">BATHS</p>
-            </div>
-
-            <div className="text-center">
-              <Ruler className="mx-auto text-orange-500 mb-2" size={20} />
-              <h4 className="font-bold">3100</h4>
-              <p className="text-xs text-gray-500">SQFT</p>
-            </div>
-          </div>
-
-          <div>
-            <span className="bg-orange-500 text-white px-5 py-2 rounded-full text-sm font-semibold">
-              ACTIVE
-            </span>
-          </div>
-        </div>
-      </section>
-      <div className="bg-[#f5f5f5] min-h-screen pb-20">
-        {/* Property Details */}
-        <section className="max-w-7xl mx-auto px-4 mt-10">
-          <div className="grid lg:grid-cols-[2fr_1fr] gap-6">
-            {/* Details Card */}
-            <div className="bg-[#06132e] rounded-xl p-8 shadow-xl">
-              <div className="flex gap-8 border-b border-white/10 pb-4 mb-6">
-                <button className="text-orange-400 font-semibold">
-                  PROPERTY
-                </button>
-                <button className="text-white">DETAILS</button>
-                <button className="text-white">ROOM SIZES</button>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-8 text-white">
-                <div>
-                  <p className="text-gray-400 text-sm">MLS ID</p>
-                  <p>X13079728</p>
+          <div className="relative overflow-hidden rounded-[28px] shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
+            <div className="relative h-[420px] md:h-[520px]">
+              {hero?.heroImage ? (
+                <img
+                  src={hero.heroImage}
+                  alt={hero.title || "Property"}
+                  className="h-full w-full "
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center bg-slate-200">
+                  <ImageIcon size={48} className="text-slate-400" />
                 </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10" />
 
-                <div>
-                  <p className="text-gray-400 text-sm">Property Type</p>
-                  <p>Triplex</p>
-                </div>
-
-                <div>
-                  <p className="text-gray-400 text-sm">Status</p>
-                  <p>Active</p>
-                </div>
-
-                <div>
-                  <p className="text-gray-400 text-sm">Style</p>
-                  <p>2 Storey</p>
-                </div>
-
-                <div>
-                  <p className="text-gray-400 text-sm">Exterior</p>
-                  <p>Stucco / Vinyl</p>
-                </div>
-
-                <div>
-                  <p className="text-gray-400 text-sm">Year Built</p>
-                  <p>0-5</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Features */}
-            <div>
-              <h3 className="font-bold mb-4">Property Features</h3>
-
-              <div className="grid grid-cols-2 gap-3">
-                {features.map((feature) => (
-                  <div
-                    key={feature}
-                    className="bg-white rounded-lg shadow-sm p-4 text-center text-sm"
+              <div className="absolute left-5 top-5 flex flex-wrap gap-2">
+                {(hero?.badges || []).slice(0, 3).map((badge) => (
+                  <span
+                    key={badge.text}
+                    className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-800 backdrop-blur-md"
                   >
-                    {feature}
-                  </div>
+                    {badge.text}
+                  </span>
                 ))}
               </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Neighborhood */}
-        <section className="max-w-7xl mx-auto px-4 mt-14">
-          <h2 className="text-3xl font-bold">Neighborhood Overview</h2>
-
-          <p className="text-gray-500 mt-2">Complete neighborhood profile</p>
-
-          <div className="grid md:grid-cols-3 gap-10 mt-10">
-            <ScoreCard
-              score="84"
-              title="Very Walkable"
-              desc="Most errands can be accomplished on foot"
-              icon={<Trees size={18} />}
-            />
-
-            <ScoreCard
-              score="51"
-              title="Good Transit"
-              desc="A few public transportation options"
-              icon={<Bus size={18} />}
-            />
-
-            <ScoreCard
-              score="58"
-              title="Bikeable"
-              desc="Some bike infrastructure"
-              icon={<Bike size={18} />}
-            />
-          </div>
-        </section>
-
-        {/* Location */}
-        <section className="max-w-7xl mx-auto px-4 mt-16">
-          <h2 className="text-3xl font-bold mb-8">Location Information</h2>
-
-          <div className="grid lg:grid-cols-[2fr_1fr] gap-6">
-            {/* Map */}
-            <div className="bg-white rounded-xl overflow-hidden shadow-lg">
-              <img
-                src="https://images.unsplash.com/photo-1524661135-423995f22d0b"
-                className="w-full h-[450px] object-cover"
-                alt=""
-              />
-            </div>
-
-            {/* AI Insight */}
-            <div className="bg-orange-50 border border-orange-200 rounded-xl p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles size={20} className="text-orange-500" />
-                <h3 className="font-bold text-orange-600">AI Market Insight</h3>
+              <div className="absolute right-5 top-5 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleShare(data.property)}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-700 backdrop-blur-md transition hover:bg-white"
+                >
+                  <Share2 size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleFavorite(data.property)}
+                  className={`flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition hover:bg-white ${
+                    favorites.some((fav) => fav.id === data.property?.id)
+                      ? "bg-red-500 text-white"
+                      : "bg-white/90 text-slate-700"
+                  }`}
+                >
+                  <Heart
+                    size={16}
+                    fill={
+                      favorites.some((fav) => fav.id === data.property?.id)
+                        ? "currentColor"
+                        : "none"
+                    }
+                  />
+                </button>
               </div>
 
-              <ul className="space-y-5 text-sm text-gray-700">
-                <li>
-                  Strong family-oriented neighborhood with growing property
-                  value.
-                </li>
+              <div className="absolute bottom-6 left-6 right-6 flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium uppercase tracking-[0.2em] text-orange-300">
+                    {details?.saleType || "For Sale"}
+                  </p>
+                  <h1 className="mt-2 text-3xl font-black text-white md:text-5xl">
+                    {hero?.title}
+                  </h1>
+                  <p className="mt-2 flex items-center gap-2 text-sm text-white/80 md:text-base">
+                    <MapPin size={16} />
+                    {hero?.subtitle}
+                  </p>
+                </div>
 
-                <li>
-                  Market demand increased significantly compared to previous
-                  year.
-                </li>
+                {photos.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => openGallery(0)}
+                    className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-lg transition hover:bg-orange-50"
+                  >
+                    View {photos.length} photos
+                  </button>
+                )}
+              </div>
+            </div>
 
-                <li>
-                  Excellent location near schools, recreation facilities and
-                  public transit.
-                </li>
-              </ul>
+            {photos.length > 1 && (
+              <div className="grid grid-cols-4 gap-1 bg-black p-1 md:grid-cols-6">
+                {photos.slice(0, 6).map((photo, index) => (
+                  <button
+                    key={photo.src}
+                    type="button"
+                    onClick={() => openGallery(index)}
+                    className="relative aspect-[4/3] overflow-hidden"
+                  >
+                    <img
+                      src={photo.src}
+                      alt=""
+                      className="h-full w-full object-cover transition hover:scale-105"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
-              <button className="mt-8 bg-orange-500 text-white px-5 py-3 rounded-lg w-full">
-                View On Map
+          <div className="relative z-10 -mt-8 mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-6 rounded-[24px] bg-white px-6 py-7 shadow-[0_16px_40px_rgba(0,0,0,0.12)] md:px-10">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
+                Listing price
+              </p>
+              <p className="mt-1 text-3xl font-black text-slate-900 md:text-4xl">
+                {hero?.priceText || formatCurrency(hero?.price)}
+              </p>
+            </div>
+
+            <div className="flex gap-8 md:gap-12">
+              <Stat icon={BedDouble} value={hero?.beds} label="Beds" />
+              <Stat icon={Bath} value={hero?.baths} label="Baths" />
+              <Stat icon={Ruler} value={hero?.sqft} label="Sqft" />
+            </div>
+
+            <span
+              className={`rounded-full px-5 py-2 text-sm font-bold uppercase tracking-wide text-white ${statusBadgeClass(hero?.status)}`}
+            >
+              {hero?.status}
+            </span>
+          </div>
+        </section>
+
+        <section className="mx-auto mt-10 grid max-w-7xl gap-8 px-4 lg:grid-cols-[1.6fr_1fr] lg:px-6">
+          <div className="space-y-6">
+            <div className="overflow-hidden rounded-[24px] bg-[#06132e] shadow-xl">
+              <div className="flex gap-6 border-b border-white/10 px-8 pt-6">
+                {TABS.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`pb-4 text-sm font-semibold transition ${
+                      activeTab === tab.id
+                        ? "border-b-2 border-[#F58232] text-[#F58232]"
+                        : "text-white/70 hover:text-white"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid gap-6 p-8 text-white md:grid-cols-3">
+                {activeTab === "property" && (
+                  <>
+                    <DetailItem label="MLS ID" value={details?.mlsId} />
+                    <DetailItem
+                      label="Property Type"
+                      value={details?.propertyType}
+                    />
+                    <DetailItem label="Status" value={details?.status} />
+                    <DetailItem label="Style" value={details?.propertyStyle} />
+                    <DetailItem
+                      label="Exterior"
+                      value={details?.exterior || "—"}
+                    />
+                    <DetailItem
+                      label="Year Built"
+                      value={details?.yearBuilt || "—"}
+                    />
+                  </>
+                )}
+
+                {activeTab === "details" && (
+                  <>
+                    <DetailItem label="Class" value={details?.propertyClass} />
+                    <DetailItem label="Taxes" value={details?.taxes || "—"} />
+                    <DetailItem
+                      label="Maintenance"
+                      value={details?.maintenance || "—"}
+                    />
+                    <DetailItem
+                      label="Parking"
+                      value={details?.parking || "—"}
+                    />
+                    <DetailItem label="Pool" value={details?.pool || "—"} />
+                    <DetailItem
+                      label="Cross Street"
+                      value={details?.crossStreet || "—"}
+                    />
+                  </>
+                )}
+
+                {activeTab === "rooms" && (
+                  <>
+                    <DetailItem label="Bedrooms" value={hero?.beds} />
+                    <DetailItem label="Bathrooms" value={hero?.baths} />
+                    <DetailItem label="Living Area" value={hero?.sqft} />
+                    <DetailItem
+                      label="Lot Width"
+                      value={details?.lotWidth || "—"}
+                    />
+                    <DetailItem
+                      label="Lot Depth"
+                      value={details?.lotDepth || "—"}
+                    />
+                    <DetailItem
+                      label="Property Style"
+                      value={details?.propertyStyle}
+                    />
+                  </>
+                )}
+              </div>
+            </div>
+
+            {details?.features?.length > 0 && (
+              <div className="rounded-[24px] bg-white p-8 shadow-sm">
+                <h2 className="text-xl font-bold text-slate-900">
+                  Property Features
+                </h2>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {details.features.map((feature) => (
+                    <div
+                      key={feature}
+                      className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700"
+                    >
+                      {feature}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(activeComps.length > 0 || soldComps.length > 0) && (
+              <div className="rounded-[24px] bg-white p-8 shadow-sm">
+                <div className="flex items-center gap-2">
+                  <Sparkles size={20} className="text-[#F58232]" />
+                  <h2 className="text-xl font-bold text-slate-900">
+                    Market Comparisons
+                  </h2>
+                </div>
+                <p className="mt-2 text-sm text-slate-500">
+                  Compare this listing with nearby active and sold properties.
+                </p>
+
+                <div className="mt-6 space-y-4">
+                  {activeComps.slice(0, 2).map((comp) => (
+                    <ComparisonCard key={comp.id} comp={comp} tone="active" />
+                  ))}
+                  {soldComps.slice(0, 2).map((comp) => (
+                    <ComparisonCard
+                      key={`sold-${comp.id}`}
+                      comp={comp}
+                      tone="sold"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {insights.length > 0 && (
+              <div className="rounded-[24px] border border-orange-100 bg-orange-50 p-8">
+                <div className="flex items-center gap-2">
+                  <Sparkles size={20} className="text-[#F58232]" />
+                  <h2 className="text-xl font-bold text-orange-700">
+                    Local Insights
+                  </h2>
+                </div>
+                <div className="mt-5 grid gap-4 md:grid-cols-2">
+                  {insights.slice(0, 4).map((item) => (
+                    <div
+                      key={`${item.id}-${item.insight}`}
+                      className="rounded-2xl bg-white/80 p-4 shadow-sm"
+                    >
+                      <p className="text-xs font-semibold uppercase tracking-wide text-[#F58232]">
+                        {item.insight_desc}
+                      </p>
+                      <p className="mt-2 font-semibold text-slate-900">
+                        {item.addr}
+                      </p>
+                      <p className="mt-1 text-sm text-slate-500">
+                        {formatCurrency(item.lp_dol)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {chartData.length > 0 && (
+              <div className="rounded-[24px] bg-[#00132D] p-6 shadow-xl">
+                <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">
+                      {neighborhood?.municipality || "Area"} home prices
+                    </h2>
+                    <p className="mt-1 text-xs text-[#F58232]">
+                      6-month valuation trend across asset classes
+                    </p>
+                  </div>
+                </div>
+
+                <div className="h-[260px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid stroke="#233149" vertical={false} />
+                      <XAxis
+                        dataKey="month"
+                        tick={{ fill: "#fff", fontSize: 10 }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        tick={{ fill: "#fff", fontSize: 10 }}
+                        axisLine={false}
+                        tickLine={false}
+                        tickFormatter={(v) => `$${v}k`}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          background: "#0f172a",
+                          border: "none",
+                          borderRadius: 12,
+                          color: "#fff",
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="detached"
+                        stroke="#FF5C5C"
+                        strokeWidth={3}
+                        dot={false}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="semi"
+                        stroke="#20C997"
+                        strokeWidth={3}
+                        dot={false}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="townhouse"
+                        stroke="#3B82F6"
+                        strokeWidth={3}
+                        dot={false}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="condo"
+                        stroke="#8B5CF6"
+                        strokeWidth={3}
+                        dot={false}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="mt-4 flex flex-wrap justify-center gap-6">
+                  {TREND_LINES.map((line) => (
+                    <div key={line.key} className="flex items-center gap-2">
+                      <div
+                        className="h-3 w-3 rounded-full"
+                        style={{ background: line.color }}
+                      />
+                      <span className="text-[11px] uppercase tracking-wide text-white">
+                        {line.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <aside className="space-y-6">
+            <div className="rounded-[24px] bg-white p-6 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                Estimated monthly
+              </p>
+              <p className="mt-2 text-4xl font-black text-slate-900">
+                {formatCurrency(calculatorResults?.estimatedMonthly)}
+                <span className="text-base font-medium text-slate-400">
+                  {" "}
+                  /mo
+                </span>
+              </p>
+
+              {calculatorInputs && (
+                <div className="mt-6 space-y-4">
+                  <SliderField
+                    label="Down payment"
+                    value={calculatorInputs.downPaymentPercent}
+                    suffix="%"
+                    min={5}
+                    max={50}
+                    step={5}
+                    onChange={(value) =>
+                      setCalculatorInputs((prev) => ({
+                        ...prev,
+                        downPaymentPercent: value,
+                      }))
+                    }
+                  />
+                  <SliderField
+                    label="Interest rate"
+                    value={calculatorInputs.interestRate}
+                    suffix="%"
+                    min={2}
+                    max={10}
+                    step={0.1}
+                    onChange={(value) =>
+                      setCalculatorInputs((prev) => ({
+                        ...prev,
+                        interestRate: value,
+                      }))
+                    }
+                  />
+                </div>
+              )}
+
+              <div className="mt-6 space-y-3 border-t border-slate-100 pt-5 text-sm">
+                <CalcRow
+                  label="Loan amount"
+                  value={formatCurrency(calculatorResults?.loanAmount)}
+                />
+                <CalcRow
+                  label="Down payment"
+                  value={formatCurrency(calculatorResults?.downPayment)}
+                />
+                <CalcRow
+                  label="Property tax (est.)"
+                  value={`${formatCurrency(calculatorResults?.propertyTaxMonthly)} / mo`}
+                />
+              </div>
+
+              {calculatorResults?.affordabilityScore && (
+                <div className="mt-5 rounded-2xl bg-green-50 px-4 py-3">
+                  <p className="text-xs uppercase tracking-wide text-green-700">
+                    Affordability score
+                  </p>
+                  <p className="text-2xl font-black text-green-800">
+                    {calculatorResults.affordabilityScore}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-[24px] bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-lg">
+                  {data.contact?.agent?.thumbnail ? (
+                    <img
+                      src={data.contact.agent.thumbnail}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    "👤"
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900">
+                    {data.contact?.agent?.name || "Listing Agent"}
+                  </h3>
+                  <p className="text-sm text-slate-500">Contact agent</p>
+                </div>
+              </div>
+
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                {data.contact?.agent?.phone && (
+                  <a
+                    href={`tel:${data.contact.agent.phone}`}
+                    className="flex items-center justify-center gap-2 rounded-2xl bg-slate-100 py-3 text-sm font-semibold text-slate-700 transition hover:bg-orange-50 hover:text-[#F58232]"
+                  >
+                    <Phone size={15} />
+                    Call
+                  </a>
+                )}
+                {data.contact?.agent?.email && (
+                  <a
+                    href={`mailto:${data.contact.agent.email}`}
+                    className="flex items-center justify-center gap-2 rounded-2xl bg-slate-100 py-3 text-sm font-semibold text-slate-700 transition hover:bg-orange-50 hover:text-[#F58232]"
+                  >
+                    <Mail size={15} />
+                    Email
+                  </a>
+                )}
+              </div>
+
+              <textarea
+                defaultValue={data.contact?.defaultMessage}
+                rows={3}
+                className="mt-5 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-[#F58232]"
+              />
+              <button
+                type="button"
+                className="mt-3 w-full rounded-full bg-[#F58232] py-3 text-sm font-semibold text-white transition hover:bg-[#e67428]"
+              >
+                Send inquiry
               </button>
             </div>
+
+            <div className="rounded-[24px] bg-white p-6 shadow-sm">
+              <h3 className="text-lg font-bold text-slate-900">
+                Neighborhood Overview
+              </h3>
+              <div className="mt-5 space-y-5">
+                <ScoreRow
+                  icon={<Trees size={18} />}
+                  title="Walk Score"
+                  score={neighborhood?.walkscore || "—"}
+                  desc={neighborhood?.community || neighborhood?.municipality}
+                />
+                <ScoreRow
+                  icon={<Bus size={18} />}
+                  title="Transit"
+                  score="Good"
+                  desc="Public transportation nearby"
+                />
+                <ScoreRow
+                  icon={<Bike size={18} />}
+                  title="Bikeable"
+                  score="Moderate"
+                  desc="Some bike infrastructure"
+                />
+              </div>
+            </div>
+          </aside>
+        </section>
+
+        <section className="mx-auto mt-10 max-w-7xl px-4 lg:px-6">
+          <h2 className="mb-5 text-2xl font-bold text-slate-900">Location</h2>
+          <div className="overflow-hidden rounded-[24px] bg-white shadow-sm">
+            {mapUrl ? (
+              <iframe
+                title="Property location map"
+                src={mapUrl}
+                className="h-[420px] w-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            ) : (
+              <div className="flex h-[320px] items-center justify-center bg-slate-100 text-slate-500">
+                Map unavailable for this listing
+              </div>
+            )}
           </div>
         </section>
-      </div>
-
-      <div className="flex items-center gap-8">
-        {/* Left Property Card */}
-        <div className="w-[230px] bg-[#02132D] rounded-[18px] shadow-[0_8px_25px_rgba(0,0,0,0.18)] overflow-hidden">
-          <div className="p-[8px]">
-            <img
-              src="/property-1.jpg"
-              alt=""
-              className="w-full h-[155px] object-cover rounded-[12px]"
-            />
-          </div>
-
-          <div className="px-4 pb-4">
-            <h3 className="text-white text-[34px] font-bold leading-none">
-              $749,900
-            </h3>
-
-            <p className="text-[#8A93A7] text-[10px] mt-1 leading-relaxed">
-              55 Allan Avenue, Homeside, Hamilton
-            </p>
-
-            <div className="mt-5 space-y-3">
-              <div className="flex justify-between text-[11px]">
-                <span className="text-[#8A93A7]">Beds</span>
-                <span className="text-white">4</span>
-              </div>
-
-              <div className="h-px bg-white/10" />
-
-              <div className="flex justify-between text-[11px]">
-                <span className="text-[#8A93A7]">Baths</span>
-                <span className="text-white">4</span>
-              </div>
-
-              <div className="h-px bg-white/10" />
-
-              <div className="flex justify-between text-[11px]">
-                <span className="text-[#8A93A7]">Size</span>
-                <span className="text-white">1,100–1,500 sqft</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* VS Circle */}
-        <div className="w-8 h-8 rounded-full bg-[#F58232] flex items-center justify-center shadow-md shrink-0">
-          <span className="text-white text-[11px] font-semibold">VS</span>
-        </div>
-
-        {/* Right Comparison Card */}
-        <div className="flex-1 bg-[#02132D] rounded-[22px] shadow-[0_8px_25px_rgba(0,0,0,0.18)] p-6">
-          {/* Top */}
-          <div className="flex justify-between">
-            <div>
-              <h2 className="text-white text-[34px] font-bold leading-none">
-                $825,000
-              </h2>
-
-              <div className="flex items-center gap-2 mt-3">
-                <span className="text-[#C3C9D5] text-[11px]">
-                  44 Venture Avenue
-                </span>
-
-                <span className="bg-white/10 text-white text-[10px] px-2 py-1 rounded">
-                  1 Km away
-                </span>
-              </div>
-            </div>
-
-            <img
-              src="/property-2.jpg"
-              alt=""
-              className="w-[108px] h-[70px] object-cover rounded-[10px]"
-            />
-          </div>
-
-          {/* Stats Box */}
-          <div className="mt-5 border border-white/15 rounded-[8px] overflow-hidden">
-            <div className="grid grid-cols-3">
-              <div className="text-center py-4">
-                <p className="text-[#B9C0CF] text-[11px]">Beds</p>
-
-                <p className="text-[#F58232] text-[13px] font-semibold mt-2">
-                  3
-                </p>
-              </div>
-
-              <div className="text-center py-4 border-x border-white/10">
-                <p className="text-[#B9C0CF] text-[11px]">Baths</p>
-
-                <p className="text-[#F58232] text-[13px] font-semibold mt-2">
-                  4
-                </p>
-              </div>
-
-              <div className="text-center py-4">
-                <p className="text-[#B9C0CF] text-[11px]">Size</p>
-
-                <p className="text-[#F58232] text-[13px] font-semibold mt-2">
-                  1,100–1,500 sqft
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* AI Summary */}
-          <div className="mt-5">
-            <h4 className="text-[#F58232] text-[13px] font-semibold flex items-center gap-2">
-              ✦ AI Summary
-            </h4>
-
-            <ul className="mt-3 space-y-2">
-              <li className="text-[#C4CBD8] text-[11px]">
-                100 Good offers a better price (-$26k)
-              </li>
-
-              <li className="text-[#C4CBD8] text-[11px]">
-                100 Good provides one extra bedroom
-              </li>
-
-              <li className="text-[#C4CBD8] text-[11px]">
-                44 Venture has slightly larger backyard
-              </li>
-            </ul>
-          </div>
-
-          <div className="h-px bg-white/10 my-5" />
-
-          <p className="text-white text-[20px] font-semibold leading-relaxed">
-            "100 Good offers stronger overall family value."
-          </p>
-        </div>
-      </div>
-
-      <div className="bg-[#00132D] rounded-[14px] shadow-[0_8px_25px_rgba(0,0,0,0.18)] p-6">
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <h2 className="text-white text-[32px] font-bold leading-none">
-              Malton home prices
-            </h2>
-
-            <p className="text-[#F58232] text-[12px] mt-2">
-              6-month valuation trend across all asset classes
-            </p>
-          </div>
-
-          <div className="flex gap-2">
-            <button className="h-8 px-3 rounded bg-white text-[11px] font-medium">
-              6M
-            </button>
-
-            <button className="h-8 px-3 rounded bg-white/10 text-white text-[11px]">
-              1Y
-            </button>
-
-            <button className="h-8 px-3 rounded bg-white/10 text-white text-[11px]">
-              ALL
-            </button>
-          </div>
-        </div>
-
-        <div className="h-[260px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={trendData}>
-              <CartesianGrid stroke="#233149" vertical={false} />
-
-              <XAxis
-                dataKey="month"
-                tick={{
-                  fill: "#fff",
-                  fontSize: 10,
-                }}
-                axisLine={false}
-                tickLine={false}
-              />
-
-              <YAxis
-                tick={{
-                  fill: "#fff",
-                  fontSize: 10,
-                }}
-                axisLine={false}
-                tickLine={false}
-                domain={[200, 1200]}
-                tickFormatter={(v) => `$${v}k`}
-              />
-
-              <Tooltip />
-
-              <Line
-                type="monotone"
-                dataKey="detached"
-                stroke="#FF5C5C"
-                strokeWidth={3}
-                dot={false}
-              />
-
-              <Line
-                type="monotone"
-                dataKey="semi"
-                stroke="#20C997"
-                strokeWidth={3}
-                dot={false}
-              />
-
-              <Line
-                type="monotone"
-                dataKey="townhouse"
-                stroke="#3B82F6"
-                strokeWidth={3}
-                dot={false}
-              />
-
-              <Line
-                type="monotone"
-                dataKey="condo"
-                stroke="#8B5CF6"
-                strokeWidth={3}
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="flex justify-center gap-8 mt-6">
-          <LegendItem color="#FF5C5C" label="DETACHED" />
-
-          <LegendItem color="#20C997" label="SEMI-DETACHED" />
-
-          <LegendItem color="#3B82F6" label="TOWNHOUSE" />
-
-          <LegendItem color="#8B5CF6" label="CONDO APARTMENT" />
-        </div>
-      </div>
-
-      <div className="mt-12">
-        <div className="flex justify-between items-start">
-          <div>
-            <h2 className="text-[42px] font-bold leading-none">
-              Insights for 3067 Churchill Avenue
-            </h2>
-
-            <p className="text-[#555] text-[12px] mt-4 max-w-[700px]">
-              View the highest and lowest priced active homes, recent sales on
-              the same street and postal code, and upcoming open houses this
-              weekend.
-            </p>
-          </div>
-
-          <button className="border border-[#F58232] text-[#F58232] rounded-full px-5 h-10 text-sm flex items-center gap-2">
-            <ArrowUpRight size={16} />
-            View Full Local Insights
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 mt-4">
-        <PropertyCard />
-        <PropertyCard />
-
-        <PropertyCard />
-        <PropertyCard />
-
-        <PropertyCard />
-        <PropertyCard />
-      </div>
-
-      <div className="flex flex-wrap gap-3 mt-8">
-        <button className="h-11 px-5 rounded-lg bg-[#FDE7DC] border border-[#F58232] text-[#F58232] text-sm font-medium">
-          Sold in Postal Code
-        </button>
-
-        <button className="h-11 px-5 rounded-lg bg-white border text-sm">
-          Active in Postal Code
-        </button>
-
-        <button className="h-11 px-5 rounded-lg bg-white border text-sm">
-          Sold on Street
-        </button>
-
-        <button className="h-11 px-5 rounded-lg bg-white border text-sm">
-          Active on Street
-        </button>
-
-        <button className="h-11 px-5 rounded-lg bg-white border text-sm">
-          Upcoming Open Houses
-        </button>
-      </div>
-
-      <div className="mb-8">
-        <h2 className="text-[42px] font-black uppercase leading-[42px] tracking-[-0.02em] max-w-[500px]">
-          SEE WHAT OWNING THIS
-          <br />
-          HOME ACTUALLY COSTS.
-        </h2>
-      </div>
-
-      <div className="grid grid-cols-[1fr_0.95fr] gap-6">
-        {/* Left Calculator */}
-        <div className="bg-white rounded-[18px] shadow-[0_4px_18px_rgba(0,0,0,0.12)] p-6">
-          {/* Home Price */}
-          <div>
-            <div className="flex justify-between mb-3">
-              <span className="text-[13px] text-gray-600">Home Price</span>
-
-              <span className="font-semibold text-[15px]">$799,000</span>
-            </div>
-
-            <div className="relative h-[3px] bg-[#1F2A44] rounded-full">
-              <div className="absolute left-0 top-0 h-full w-[24%] bg-[#F58232]" />
-              <div className="absolute left-[24%] -translate-x-1/2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[#F58232]" />
-            </div>
-          </div>
-
-          <div className="h-px bg-[#D9D9D9] my-6" />
-
-          {/* Down Payment */}
-
-          <div>
-            <div className="flex justify-between mb-3">
-              <span className="text-[13px] text-gray-600">Down Payment</span>
-
-              <span className="font-semibold text-[15px]">20%</span>
-            </div>
-
-            <div className="relative h-[3px] bg-[#1F2A44] rounded-full">
-              <div className="absolute left-0 top-0 h-full w-[34%] bg-[#F58232]" />
-              <div className="absolute left-[34%] -translate-x-1/2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[#F58232]" />
-            </div>
-          </div>
-
-          <div className="h-px bg-[#D9D9D9] my-6" />
-
-          {/* Interest */}
-
-          <div>
-            <div className="flex justify-between mb-3">
-              <span className="text-[13px] text-gray-600">
-                Interest Payment
-              </span>
-
-              <span className="font-semibold text-[15px]">5.4%</span>
-            </div>
-
-            <div className="relative h-[3px] bg-[#1F2A44] rounded-full">
-              <div className="absolute left-0 top-0 h-full w-[55%] bg-[#F58232]" />
-              <div className="absolute left-[55%] -translate-x-1/2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[#F58232]" />
-            </div>
-          </div>
-
-          <div className="h-px bg-[#D9D9D9] my-6" />
-
-          {/* Term */}
-
-          <div>
-            <div className="flex justify-between mb-3">
-              <span className="text-[13px] text-gray-600">Term</span>
-
-              <span className="font-semibold text-[15px]">25 yrs</span>
-            </div>
-
-            <div className="relative h-[3px] bg-[#1F2A44] rounded-full">
-              <div className="absolute left-0 top-0 h-full w-[55%] bg-[#F58232]" />
-              <div className="absolute left-[55%] -translate-x-1/2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[#F58232]" />
-            </div>
-          </div>
-        </div>
-
-        {/* Right Result Card */}
-
-        <div className="bg-[#00132D] rounded-[18px] shadow-[0_4px_18px_rgba(0,0,0,0.18)] p-6">
-          <p className="uppercase text-[11px] tracking-[1px] text-gray-400">
-            Estimated Monthly
-          </p>
-
-          <div className="flex items-end gap-2 mt-1">
-            <h3 className="text-white text-[48px] font-bold leading-none">
-              $3,887
-            </h3>
-
-            <span className="text-gray-400 text-sm mb-1">/MO</span>
-          </div>
-
-          <div className="mt-8 space-y-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-400">Loan amount</span>
-
-              <span className="text-white">$639,200</span>
-            </div>
-
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-400">Down payment</span>
-
-              <span className="text-white">$159,800</span>
-            </div>
-
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-400">Property tax (est.)</span>
-
-              <span className="text-white">$402 / mo</span>
-            </div>
-
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-400">Closing costs (est.)</span>
-
-              <span className="text-white">~$22,000</span>
-            </div>
-          </div>
-
-          <div className="border border-white/10 rounded-xl mt-6 p-4">
-            <p className="text-[#F58232] text-sm font-medium">
-              Affordability score
-            </p>
-
-            <div className="flex items-center gap-2 mt-3">
-              <span className="text-white font-semibold">A-</span>
-
-              <div className="flex-1 h-[5px] bg-white/30 rounded-full overflow-hidden">
-                <div className="h-full w-[82%] bg-[#F58232]" />
-              </div>
-            </div>
-          </div>
-
-          <button className="mt-6 h-[52px] rounded-full bg-[#F58232] text-white font-semibold w-full">
-            Get pre-approved in 60s
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-4 gap-5 mt-14">
-        {[
-          {
-            icon: "💰",
-            title: "Recent Solds",
-          },
-          {
-            icon: "↑",
-            title: "Price changes",
-          },
-          {
-            icon: "💲",
-            title: "Assignment Sales",
-          },
-          {
-            icon: "🚪",
-            title: "Open Houses",
-          },
-        ].map((item) => (
-          <div
-            key={item.title}
-            className="bg-[#00132D] rounded-[14px] h-[170px] flex flex-col items-center justify-center shadow-[0_4px_18px_rgba(0,0,0,0.18)]"
-          >
-            <div className="text-[#F58232] text-[42px]">{item.icon}</div>
-
-            <h4 className="text-white text-[28px] font-bold text-center leading-tight mt-4">
-              {item.title}
-            </h4>
-
-            <p className="text-gray-400 text-sm mt-2">In Hamilton</p>
-          </div>
-        ))}
-      </div>
+      </main>
     </>
   );
 }
 
-function ScoreCard({ score, title, desc, icon }) {
+function Stat({ icon: Icon, value, label }) {
   return (
-    <div className="flex items-center gap-5">
-      <div className="w-20 h-20 rounded-full border-[5px] border-orange-500 flex items-center justify-center text-2xl font-bold bg-white">
+    <div className="text-center">
+      <Icon className="mx-auto mb-2 text-[#F58232]" size={20} />
+      <p className="text-xl font-bold text-slate-900">{value || "—"}</p>
+      <p className="text-xs uppercase tracking-wider text-slate-400">{label}</p>
+    </div>
+  );
+}
+
+function DetailItem({ label, value }) {
+  return (
+    <div>
+      <p className="text-sm text-slate-400">{label}</p>
+      <p className="mt-1 font-medium">{value || "—"}</p>
+    </div>
+  );
+}
+
+function ComparisonCard({ comp, tone }) {
+  return (
+    <div className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-slate-100 p-4">
+      <div className="flex min-w-0 flex-1 gap-4">
+        {comp.thumbnail && (
+          <img
+            src={comp.thumbnail}
+            alt=""
+            className="h-20 w-28 rounded-xl object-cover"
+          />
+        )}
+        <div>
+          <p className="text-xl font-bold text-slate-900">
+            {comp.lp_dol_text || formatCurrency(comp.lp_dol)}
+          </p>
+          <p className="font-medium text-slate-700">{comp.addr}</p>
+          <p className="text-sm text-slate-500">
+            {[comp.community, comp.municipality].filter(Boolean).join(" • ")}
+          </p>
+          <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-500">
+            <span>{comp.br} beds</span>
+            <span>{comp.bath_tot} baths</span>
+            <span>{comp.sqft} sqft</span>
+          </div>
+        </div>
+      </div>
+      <span
+        className={`rounded-full px-3 py-1 text-xs font-semibold uppercase ${
+          tone === "sold"
+            ? "bg-slate-100 text-slate-600"
+            : "bg-green-50 text-green-700"
+        }`}
+      >
+        {tone === "sold" ? "Sold" : comp.listing_text || "Active"}
+      </span>
+    </div>
+  );
+}
+
+function CalcRow({ label, value }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-slate-500">{label}</span>
+      <span className="font-semibold text-slate-900">{value}</span>
+    </div>
+  );
+}
+
+function SliderField({ label, value, suffix, min, max, step, onChange }) {
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between text-sm">
+        <span className="text-slate-600">{label}</span>
+        <span className="font-semibold text-slate-900">
+          {value}
+          {suffix}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="h-1 w-full cursor-pointer accent-[#F58232]"
+      />
+    </div>
+  );
+}
+
+function ScoreRow({ icon, title, score, desc }) {
+  return (
+    <div className="flex items-center gap-4">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full border-[4px] border-[#F58232] bg-white text-[10px] font-bold  text-slate-900">
         {score}
       </div>
-
       <div>
-        <div className="flex items-center gap-2 font-bold">
+        <div className="flex items-center gap-2 font-bold text-slate-900">
           {icon}
           {title}
         </div>
-
-        <p className="text-gray-500 text-sm mt-1">{desc}</p>
+        <p className="mt-1 text-sm text-slate-500">{desc}</p>
       </div>
     </div>
   );
 }
 
-const LegendItem = ({ color, label }) => (
-  <div className="flex items-center gap-2">
-    <div className="w-3 h-3 rounded-full" style={{ background: color }} />
-    <span className="text-white text-[11px] tracking-wide">{label}</span>
-  </div>
-);
-
-const PropertyCard = () => {
+function ListingPageFallback() {
   return (
-    <>
-      <div className="bg-[#00132D] rounded-xl overflow-hidden shadow-md flex">
-        <img
-          src="/house.jpg"
-          alt=""
-          className="w-[170px] h-[110px] object-cover"
-        />
-
-        <div className="p-4 flex-1">
-          <p className="text-white text-sm">80 Goode Street</p>
-
-          <h3 className="text-[#F58232] text-[28px] font-bold leading-none mt-2">
-            $888,000
-          </h3>
-
-          <div className="flex gap-2 mt-3 flex-wrap">
-            <span className="bg-white rounded-full px-2 py-1 text-[10px] flex items-center gap-1">
-              <BedDouble size={10} />4
-            </span>
-
-            <span className="bg-white rounded-full px-2 py-1 text-[10px] flex items-center gap-1">
-              <Bath size={10} />2
-            </span>
-
-            <span className="bg-white rounded-full px-2 py-1 text-[10px] flex items-center gap-1">
-              <Ruler size={10} />
-              1100-1500 sqft
-            </span>
-          </div>
-
-          <div className="mt-3">
-            <span className="bg-[#2F5138] text-[#7AFFA5] text-[10px] px-3 py-1 rounded-full">
-              Active
-            </span>
-          </div>
-        </div>
+    <div className="flex min-h-screen items-center justify-center bg-[#f5f5f5]">
+      <div className="text-center">
+        <div className="mx-auto mb-4 h-14 w-14 animate-spin rounded-full border-4 border-[#F58232] border-t-transparent" />
+        <p className="text-sm font-medium text-slate-600">
+          Loading property details…
+        </p>
       </div>
-    </>
+    </div>
   );
-};
+}
+
+export default function ListingDetailPage() {
+  return (
+    <Suspense fallback={<ListingPageFallback />}>
+      <ListingDetailContent />
+    </Suspense>
+  );
+}

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ChevronRight } from "lucide-react";
 
 const cities = [
   {
@@ -88,16 +87,16 @@ export default function PopularCities() {
             </p>
           </div>
 
-          <Link
+          {/* <Link
             href="/cities"
             className="hidden items-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white px-5 py-3 text-sm font-semibold text-[#111827] transition-all hover:border-[#F97316] hover:text-[#F97316] md:flex"
           >
             View All Cities
             <ChevronRight size={16} />
-          </Link>
+          </Link> */}
         </div>
 
-        <div className="mt-14 grid grid-cols-2 gap-5 grid-cols-2 sm:grid-cols-4 md:grid-cols-8">
+        <div className="mt-10 sm:mt-14 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 lg:grid-cols-8 lg:gap-5">
           {cities.map((city, index) => (
             <motion.div
               key={city.name}
@@ -108,13 +107,13 @@ export default function PopularCities() {
               variants={fadeUp}
             >
               <Link
-                href={`/city/${city.name.toLowerCase()}`}
+                href={`/real-estate-listings?area_slug=${city.name.toLowerCase()}`}
                 className="group block"
               >
                 <div className="flex flex-col items-center text-center">
                   <motion.div
                     whileHover={{ y: -4 }}
-                    className={`flex h-[120px] w-[120px] items-center justify-center rounded-[28px] border border-[#E5E7EB] shadow-[0_8px_25px_rgba(0,0,0,0.04)] transition-all group-hover:shadow-[0_18px_40px_rgba(0,0,0,0.08)] ${city.bg}`}
+                    className={`flex h-[100px] w-[100px] sm:h-[120px] sm:w-[120px] items-center justify-center rounded-[24px] sm:rounded-[28px] border border-[#E5E7EB] shadow-[0_8px_25px_rgba(0,0,0,0.04)] transition-all group-hover:shadow-[0_18px_40px_rgba(0,0,0,0.08)] ${city.bg}`}
                   >
                     <motion.img
                       whileHover={{ scale: 1.08 }}
@@ -135,14 +134,14 @@ export default function PopularCities() {
           ))}
         </div>
 
-        <div className="mt-10 flex justify-center md:hidden">
+        {/* <div className="mt-10 flex justify-center md:hidden">
           <Link
             href="/cities"
             className="rounded-2xl border border-[#F97316] px-6 py-3 text-sm font-semibold text-[#F97316]"
           >
             View All Cities
           </Link>
-        </div>
+        </div> */}
       </div>
     </section>
   );

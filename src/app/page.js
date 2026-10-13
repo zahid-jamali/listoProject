@@ -5,18 +5,19 @@ import PopularCities from "@/components/home/PopularCities";
 import PreConstruction from "@/components/home/Preconstruction";
 import PropertyCards from "@/components/home/PropertyCards";
 import PropertyReels from "@/components/home/PropertyReels";
+import LocationModal from "@/components/modals/LocationModal";
 
 const Home = () => {
   return (
     <>
-      {/* <Navbar /> */}
       <HeroSection />
-      <PropertyCards />
       <FeaturedListings />
-      <PopularCities />
+      <PropertyCards />
       <PreConstruction />
+      <PopularCities />
       <PropertyReels />
       <AdvertisementBanner />
+      <LocationModal />
     </>
   );
 };

@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import {
   BedDouble,
   Bath,
@@ -12,204 +11,190 @@ import {
   Heart,
   ChevronRight,
   MapPin,
+  Sparkles,
+  Compass,
 } from "lucide-react";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: (i) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-      delay: i * 0.08,
-    },
-  }),
-};
+import { toast } from "react-hot-toast";
+import ListingCards from "../ListingCards";
+import { getListingUrl } from "@/lib/listing-url";
+import { useLocation } from "@/context/LocationContext";
 
 export default function FeaturedListings() {
   const router = useRouter();
+  const { selectedLocation, setIsLocationModalOpen } = useLocation();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState([]);
+  const [isCustomLocation, setIsCustomLocation] = useState(false);
 
   useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem("favoriteListings")) || [];
+    setFavorites(stored);
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
     const fetchListings = async () => {
+      setLoading(true);
       try {
-        const response = await fetch("/api/listings?type=RS&limit=3");
+        let url = "/api/listings?type=RS&limit=3&sort=ld&order=desc";
+        
+        if (selectedLocation?.munc_slug) {
+          url += `&loc_type=MUNC&search_text=${encodeURIComponent(selectedLocation.munc_slug)}`;
+        }
+
+        const response = await fetch(url);
         const data = await response.json();
-        setListings(data?.rows || []);
+        
+        if (isMounted) {
+          const rows = data?.rows || [];
+          if (rows.length > 0) {
+            setListings(rows);
+            setIsCustomLocation(Boolean(selectedLocation?.munc_slug));
+          } else if (selectedLocation?.munc_slug) {
+            // Fallback to default featured listings if chosen city has 0 active listings
+            const fallbackRes = await fetch("/api/listings?type=RS&limit=3&sort=ld&order=desc");
+            const fallbackData = await fallbackRes.json();
+            if (isMounted) {
+              setListings(fallbackData?.rows || []);
+              setIsCustomLocation(false);
+            }
+          } else {
+            setListings([]);
+            setIsCustomLocation(false);
+          }
+        }
       } catch (error) {
-        console.error(error);
+        console.error("Failed to fetch location featured listings:", error);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchListings();
-  }, []);
 
-  const handleClick = (listing) => {
-    sessionStorage.setItem("listing", JSON.stringify(listing));
-    router.push(
-      `/listings/ind?id=${encodeURIComponent(listing.id)}&type=${encodeURIComponent(listing.type || "RS")}&brd=${encodeURIComponent(listing.brd || "")}`
-    );
-  };
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedLocation]);
 
   return (
-    <section className="bg-[#F7F8FA] py-20 lg:py-24">
+    <section className="bg-[#F7F8FA] py-10 sm:py-14">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
-        {/* Header */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        {/* Dynamic Location Header */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between border-b border-gray-200/80 pb-6">
           <div>
-            <span className="inline-flex rounded-full border border-[#FED7AA] bg-[#FFF7ED] px-4 py-2 text-sm font-medium text-[#F97316]">
-              Featured Properties
-            </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50 px-3.5 py-1 text-xs font-semibold text-[#F58232]">
+                <Sparkles size={13} className="text-[#F58232]" />
+                Featured Properties
+              </span>
 
-            <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl">
-              Featured Listings
+              {/* Location Badge with Click-to-Change */}
+              <button
+                onClick={() => setIsLocationModalOpen(true)}
+                className="group inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-1 text-xs font-medium text-slate-700 shadow-sm transition-all hover:border-[#F58232] hover:text-[#F58232]"
+              >
+                <MapPin size={13} className="text-[#F58232]" />
+                <span>
+                  Location: <strong className="text-slate-900 group-hover:text-[#F58232]">{selectedLocation?.name || "All Ontario"}</strong>
+                </span>
+                <span className="text-[10px] text-slate-400 font-semibold group-hover:text-[#F58232] underline ml-1">
+                  Change
+                </span>
+              </button>
+            </div>
+
+            <h2 className="mt-3 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-[#111827]">
+              {selectedLocation?.name
+                ? `Featured Listings in ${selectedLocation.name}`
+                : "Featured Listings Across Ontario"}
             </h2>
 
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-[#6B7280] sm:text-base">
-              Explore hand-picked opportunities, premium developments and
-              high-potential investment projects.
+            <p className="mt-2 max-w-2xl text-xs sm:text-sm text-[#6B7280]">
+              {isCustomLocation
+                ? `Showing the latest active residential properties in ${selectedLocation?.name}.`
+                : "Explore hand-picked residential opportunities, developments, and top market deals."}
             </p>
           </div>
 
-          <Link
-            href="/featured"
-            className="hidden items-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white px-5 py-3 text-sm font-semibold text-[#111827] transition-all hover:border-[#F97316] hover:text-[#F97316] md:flex"
-          >
-            View All
-            <ChevronRight size={16} />
-          </Link>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsLocationModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-2xl border border-gray-300 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-[#F58232] hover:text-[#F58232] active:scale-95"
+            >
+              <Compass size={16} className="text-[#F58232]" />
+              Change City
+            </button>
+
+            <Link
+              href={
+                selectedLocation?.munc_slug
+                  ? `/real-estate-listings?munc_slug=${encodeURIComponent(selectedLocation.munc_slug)}`
+                  : "/real-estate-listings"
+              }
+              className="hidden sm:inline-flex items-center gap-2 rounded-2xl bg-[#F58232] hover:bg-[#e67428] px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-orange-500/20 transition-all hover:brightness-105"
+            >
+              Browse All
+              <ChevronRight size={16} />
+            </Link>
+          </div>
         </div>
 
+        {/* Listings Grid */}
         {loading ? (
-          <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-8 grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
             {[1, 2, 3].map((item) => (
               <div
                 key={item}
-                className="h-[500px] animate-pulse rounded-[32px] bg-white"
+                className="h-[460px] animate-pulse rounded-[32px] bg-white border border-gray-100 shadow-sm"
               />
             ))}
           </div>
-        ) : (
+        ) : listings.length > 0 ? (
           <>
-            <div className="mt-12 grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ">
+            <div className="mt-8 grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
               {listings.slice(0, 3).map((listing, index) => (
-                <motion.div
-                  key={listing.id}
-                  custom={index}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                  variants={fadeUp}
-                  whileHover={{ y: -6 }}
-                  className="group overflow-hidden rounded-3xl bg-white border border-gray-200 shadow-sm hover:shadow-xl transition-all"
-                >
-                  <div className="relative h-[220px] overflow-hidden">
-                    <img
-                      src={listing.thumbnail}
-                      alt={listing.title}
-                      className="h-full w-full object-cover transition-transform duration-900 group-hover:scale-110"
-                    />
-
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-
-                    <div className="absolute left-4 top-4 flex gap-2">
-                      {listing.badges1?.slice(0, 2).map((badge, idx) => (
-                        <span
-                          key={idx}
-                          className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-[#111827] backdrop-blur-md"
-                        >
-                          {badge.text}
-                        </span>
-                      ))}
-                    </div>
-
-                    <button className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 backdrop-blur-md">
-                      <Heart size={16} />
-                    </button>
-
-                    <div className="absolute bottom-5 left-5">
-                      <p className="text-2xl font-bold text-white">
-                        {listing.lp_dol_text}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="p-2 bg-slate-700 text-white">
-                    <h3 className="line-clamp-1 text-xl font-bold ">
-                      {listing.title}
-                    </h3>
-
-                    <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-[#F97316]">
-                      By {listing.developer_name}
-                    </p>
-
-                    <div className="mt-2 flex items-start gap-2">
-                      <MapPin
-                        size={16}
-                        className="mt-1 text-[#9CA3AF] flex-shrink-0"
-                      />
-                      <p className="line-clamp-2 text-sm leading-6 text-[#c4d1ec]">
-                        {listing.addr}, {listing.community}
-                      </p>
-                    </div>
-
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      <span className="flex items-center gap-2 rounded-full bg-[#F7F8FA] px-3 py-2 text-xs font-medium text-[#4B5563]">
-                        <BedDouble size={13} />
-                        Luxury
-                      </span>
-
-                      <span className="flex items-center gap-2 rounded-full bg-[#F7F8FA] px-3 py-2 text-xs font-medium text-[#4B5563]">
-                        <Bath size={13} />
-                        Premium
-                      </span>
-
-                      <span className="flex items-center gap-2 rounded-full bg-[#F7F8FA] px-3 py-2 text-xs font-medium text-[#4B5563]">
-                        <MoveHorizontal size={13} />
-                        {listing.sqft} - {listing.sqft_max}
-                      </span>
-                    </div>
-
-                    <div className="mt-2 flex items-center justify-between border-t border-[#F3F4F6] pt-2">
-                      <button
-                        onClick={() => {
-                          handleClick(listing);
-                        }}
-                        className="flex items-center gap-2 rounded-2xl bg-[#081A3A] px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-[#102752]"
-                      >
-                        View Details
-                        <ChevronRight size={16} />
-                      </button>
-
-                      <div className="flex items-center gap-2">
-                        <button className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#E5E7EB] text-[#6B7280] transition-all hover:border-[#F97316] hover:text-[#F97316]">
-                          <Share2 size={15} />
-                        </button>
-
-                        <button className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#E5E7EB] text-[#6B7280] transition-all hover:border-[#F97316] hover:text-[#F97316]">
-                          <Heart size={15} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
+                <ListingCards listing={listing} index={index} key={listing.id || index} />
               ))}
             </div>
 
-            <div className="mt-10 flex justify-center md:hidden">
+            <div className="mt-8 flex justify-center sm:hidden">
               <Link
-                href="/featured"
-                className="rounded-2xl border border-[#F97316] px-6 py-3 text-sm font-semibold text-[#F97316]"
+                href={
+                  selectedLocation?.munc_slug
+                    ? `/listings?munc_slug=${encodeURIComponent(selectedLocation.munc_slug)}`
+                    : "/listings"
+                }
+                className="rounded-2xl border border-[#F58232] bg-white px-6 py-3 text-xs font-bold text-[#F58232] shadow-sm"
               >
                 View All Listings
               </Link>
             </div>
           </>
+        ) : (
+          <div className="mt-8 rounded-3xl border border-gray-200 bg-white p-10 text-center shadow-sm">
+            <MapPin size={36} className="mx-auto text-slate-300 mb-3" />
+            <h4 className="text-base font-bold text-slate-800">
+              No Listings Found in {selectedLocation?.name || "Selected Area"}
+            </h4>
+            <p className="mt-1 text-xs text-slate-500 max-w-md mx-auto">
+              There are currently no active featured properties for this specific market. Try switching to a nearby city or explore all Ontario.
+            </p>
+            <button
+              onClick={() => setIsLocationModalOpen(true)}
+              className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#F58232] px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-orange-500/20 hover:bg-[#e67428]"
+            >
+              Choose Another City
+            </button>
+          </div>
         )}
       </div>
     </section>
   );
 }
+

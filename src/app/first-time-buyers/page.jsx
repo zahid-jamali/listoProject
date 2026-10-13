@@ -1,16 +1,17 @@
 "use client";
 
+import Link from "next/link";
 import {
   ShieldCheck,
   Landmark,
   HeartHandshake,
   BadgeDollarSign,
   Wallet,
+  CreditCard,
+  Building2,
+  SearchCheck,
+  Star,
 } from "lucide-react";
-
-import { CreditCard, Building2, SearchCheck } from "lucide-react";
-
-import { Star } from "lucide-react";
 
 export default function FirstTimeBuyerPage() {
   const programs = [
@@ -19,35 +20,35 @@ export default function FirstTimeBuyerPage() {
       amount: "$4,000",
       title: "Land Transfer Tax Rebate",
       description:
-        "First-time buyers can receive a refund of up to $4,000 on the provincial land transfer tax.",
-      points: ["Automatic calculation at closing", "Max rebate value: $4,000"],
+        "First-time buyers can receive a refund of up to $4,000 on the provincial land transfer tax (plus up to $4,475 in Toronto).",
+      points: ["Automatic calculation at closing", "Max provincial rebate: $4,000"],
     },
     {
       icon: HeartHandshake,
-      amount: "$35,000",
+      amount: "$60,000",
       title: "RRSP Home Buyers’ Plan (HBP)",
       description:
-        "Withdraw up to $35,000 from your RRSP tax-free to put towards your down payment.",
+        "Withdraw up to $60,000 from your RRSP tax-free to put towards your first home down payment.",
       points: [
-        "Repayment starts after 2 years",
-        "Tax-free withdrawal for home purchase",
+        "15-year repayment period",
+        "Tax-free withdrawal for qualifying home purchase",
       ],
     },
     {
       icon: BadgeDollarSign,
-      amount: "5–10%",
-      title: "Shared Equity Incentive",
+      amount: "$1,500",
+      title: "First-Time Home Buyers’ Tax Credit",
       description:
-        "Government shares a portion of your mortgage, helping reduce monthly costs.",
-      points: ["Lower monthly mortgage payments", "No interest charged"],
+        "Claim $10,000 on your federal income tax return for a $1,500 non-refundable tax credit to offset closing costs.",
+      points: ["Helps cover legal & inspection fees", "Available to eligible first-time buyers"],
     },
     {
       icon: Wallet,
       amount: "$40,000",
-      title: "FHSA Account",
+      title: "First Home Savings Account (FHSA)",
       description:
-        "Contribute up to $8,000 annually and withdraw funds tax-free for your first home.",
-      points: ["Tax-free growth", "Tax-deductible contributions"],
+        "Contribute up to $8,000 annually ($40,000 lifetime) and withdraw funds completely tax-free for your first home.",
+      points: ["Tax-free investment growth", "Tax-deductible annual contributions"],
     },
   ];
 
@@ -55,22 +56,22 @@ export default function FirstTimeBuyerPage() {
     {
       title: "1. Pre-Approval",
       description:
-        "Get a written commitment from a lender determining how much you can borrow. This locks in your interest rate.",
+        "Get a written commitment from a lender determining how much you can borrow. This locks in your interest rate for up to 120 days.",
     },
     {
       title: "2. Find Your Home",
       description:
-        "Work with a real estate professional to search for properties within your pre-approved budget.",
+        "Work with a LISTO real estate professional to search for properties within your pre-approved budget and preferred neighbourhood.",
     },
     {
       title: "3. Final Approval",
       description:
-        "Once an offer is accepted, the lender performs a final review of your financial documents.",
+        "Once an offer is accepted, the lender performs a final property appraisal and review of your financial documents.",
     },
     {
       title: "4. Closing Day",
       description:
-        "Your lawyer handles ownership transfer, closing costs and key handover.",
+        "Your real estate lawyer handles ownership transfer, land transfer tax rebates, closing costs, and key handover.",
     },
   ];
 
@@ -78,73 +79,85 @@ export default function FirstTimeBuyerPage() {
     {
       icon: CreditCard,
       title: "Save Beyond the Down Payment",
-      desc: "Remember to budget for closing costs, moving expenses and maintenance.",
+      desc: "Remember to budget 1.5% to 4% of the purchase price for closing costs, legal fees, moving expenses, and adjustments.",
     },
     {
       icon: Building2,
       title: "Watch Your Credit Score",
-      desc: "A strong credit score improves mortgage approval chances and interest rates.",
+      desc: "A strong credit score (680+) improves mortgage approval chances and unlocks the lowest fixed and variable interest rates.",
     },
     {
       icon: SearchCheck,
       title: "Get a Home Inspection",
-      desc: "Professional inspections help identify structural issues before purchase.",
+      desc: "Professional inspections help identify structural, roof, HVAC, or plumbing issues before your purchase becomes firm.",
     },
   ];
+
   const testimonials = [
     {
       name: "Sarah Jenkins",
       role: "First-Time Homeowner",
-      text: "This guide made a terrifying process feel completely manageable. The rebate information alone saved us thousands.",
+      text: "This guide made an overwhelming process feel completely manageable. The rebate information alone saved us thousands at closing.",
     },
     {
       name: "David Chen",
       role: "Toronto Buyer",
-      text: "Clear, concise, and incredibly helpful. The step-by-step mortgage process was exactly what I needed.",
+      text: "Clear, concise, and incredibly helpful. The step-by-step mortgage process and budget matcher tools were exactly what I needed.",
     },
   ];
 
   return (
-    <main className="bg-[#f4f4f4] min-h-screen">
+    <main className="bg-[#f4f4f4] min-h-screen mt-20">
       {/* HERO */}
       <section className="bg-[#ececec]">
-        <div className="max-w-7xl mx-auto px-6 py-14">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
             {/* Left */}
             <div>
               <span className="inline-flex rounded-full bg-[#F58233] px-3 py-1 text-[11px] font-semibold text-white">
-                Expert Guide 2025
+                Expert Guide 2026
               </span>
 
-              <h1 className="mt-5 text-[52px] leading-[58px] font-extrabold tracking-[-2px] text-[#111827]">
-                Ontario First-Time Home Buyer Guide (2025)
+              <h1 className="mt-4 sm:mt-5 text-3xl sm:text-[42px] lg:text-[52px] leading-[1.12] font-extrabold tracking-[-1px] sm:tracking-[-2px] text-[#111827]">
+                Ontario First-Time Home Buyer Guide
               </h1>
 
-              <p className="mt-5 max-w-xl text-[16px] leading-8 text-[#6B7280]">
+              <p className="mt-4 sm:mt-5 max-w-xl text-sm sm:text-[16px] leading-7 sm:leading-8 text-[#6B7280]">
                 Everything you need to navigate the Ontario real estate market,
-                from eligibility requirements to mortgage approvals and closing
-                costs.
+                from eligibility requirements and government rebates to mortgage
+                approvals and closing costs.
               </p>
 
-              <button className="mt-8 h-[52px] px-8 rounded-full bg-[#00112B] text-white font-semibold hover:opacity-90 transition">
-                Get Started
-              </button>
+              <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
+                <Link
+                  href="/real-estate-for-new-buyers"
+                  className="inline-flex items-center justify-center h-12 sm:h-[52px] px-8 rounded-full bg-[#00112B] text-white text-sm sm:text-base font-semibold hover:opacity-90 transition"
+                >
+                  Get Started
+                </Link>
+                <Link
+                  href="/contact-us"
+                  className="inline-flex items-center justify-center h-12 sm:h-[52px] px-8 rounded-full border border-[#00112B] text-[#00112B] text-sm sm:text-base font-semibold hover:bg-[#00112B] hover:text-white transition"
+                >
+                  Speak to an Advisor
+                </Link>
+              </div>
             </div>
 
             {/* Right */}
             <div className="relative">
               <img
                 src="/assets/first-time.png"
-                alt=""
+                alt="Ontario First-Time Home Buyer Guide"
                 className="w-full rounded-2xl object-cover shadow-[0_15px_40px_rgba(0,0,0,0.18)]"
               />
 
-              <div className="absolute left-[-25px] bottom-[25px] bg-white rounded-xl px-5 py-4 shadow-xl">
+              <div className="absolute left-4 sm:left-[-25px] bottom-[25px] bg-white rounded-xl px-4 py-3 sm:px-5 sm:py-4 shadow-xl">
                 <p className="text-[10px] uppercase text-gray-500">
                   Current Rates
                 </p>
 
-                <h4 className="text-[24px] font-bold text-[#111827]">4.85%</h4>
+                <h4 className="text-xl sm:text-[24px] font-bold text-[#111827]">4.85%</h4>
               </div>
             </div>
           </div>
@@ -152,38 +165,38 @@ export default function FirstTimeBuyerPage() {
       </section>
 
       {/* QUALIFICATION */}
-      <section className="py-20">
-        <div className="max-w-[760px] mx-auto px-6">
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-10 py-14 text-center">
+      <section className="py-14 sm:py-20">
+        <div className="max-w-[760px] mx-auto px-4 sm:px-6">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-8 sm:px-10 sm:py-14 text-center">
             <ShieldCheck size={32} className="mx-auto text-[#00112B]" />
 
-            <h2 className="mt-5 text-[30px] font-bold text-[#111827]">
+            <h2 className="mt-5 text-2xl sm:text-[30px] font-bold text-[#111827]">
               Who Qualifies as a First-Time Buyer?
             </h2>
 
-            <p className="mt-6 text-[15px] leading-8 text-gray-600">
+            <p className="mt-4 sm:mt-6 text-sm sm:text-[15px] leading-7 sm:leading-8 text-gray-600">
               To be eligible for most Ontario programs, you must be a Canadian
               citizen or permanent resident, at least 18 years of age, and have
               never owned a home anywhere in the world. If purchasing with a
-              partner, additional criteria may apply.
+              spouse or partner, additional criteria may apply.
             </p>
           </div>
         </div>
       </section>
 
       {/* PROGRAMS */}
-      <section className="pb-24">
-        <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-[38px] font-bold text-[#111827]">
+      <section className="pb-16 sm:pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl md:text-[38px] font-bold text-[#111827]">
             Ontario Programs & Rebates
           </h2>
 
-          <p className="mt-3 text-gray-500">
+          <p className="mt-2 sm:mt-3 text-sm sm:text-base text-gray-500">
             Incentives designed to make homeownership more accessible in
             Ontario.
           </p>
 
-          <div className="mt-10 grid md:grid-cols-2 gap-5">
+          <div className="mt-8 sm:mt-10 grid md:grid-cols-2 gap-4 sm:gap-5">
             {programs.map((item, index) => {
               const Icon = item.icon;
 
@@ -193,9 +206,11 @@ export default function FirstTimeBuyerPage() {
                   className="bg-[#00112B] text-white rounded-2xl p-7 shadow-xl"
                 >
                   <div className="flex justify-between items-start">
-                    <Icon size={20} />
+                    <Icon size={20} className="text-[#F58233]" />
 
-                    <span className="text-[20px] font-bold">{item.amount}</span>
+                    <span className="text-[20px] font-bold text-[#F58233]">
+                      {item.amount}
+                    </span>
                   </div>
 
                   <h3 className="mt-6 text-xl font-semibold">{item.title}</h3>
@@ -210,7 +225,7 @@ export default function FirstTimeBuyerPage() {
                         key={idx}
                         className="flex items-center gap-2 text-sm text-gray-300"
                       >
-                        <span>✓</span>
+                        <span className="text-[#F58233]">✓</span>
                         {point}
                       </li>
                     ))}
@@ -222,29 +237,67 @@ export default function FirstTimeBuyerPage() {
         </div>
       </section>
 
-      <section className="bg-[#00112B] py-16">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <h2 className="text-white text-4xl font-bold">
-            Ready to Start Your Home Buying Journey?
-          </h2>
-
-          <div className="mt-4 text-gray-300 space-y-2">
-            <p>"What Can I Get for $800K in Toronto?"</p>
-            <p>"Where can I find a Detached Home under $900K?"</p>
+      {/* 4-STEP ROADMAP */}
+      <section className="bg-white py-20 border-y border-gray-200">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center">
+            <h2 className="text-[36px] font-bold text-[#111827]">
+              4-Step Home Buying Process
+            </h2>
+            <p className="mt-3 text-gray-500">
+              From mortgage pre-approval to getting your keys on closing day.
+            </p>
           </div>
 
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <button className="h-12 px-7 rounded-full bg-[#F58233] text-white font-semibold hover:opacity-90">
-              Get Expert Consultation
-            </button>
-
-            <button className="h-12 px-7 rounded-full border border-[#F58233] text-[#F58233] hover:bg-[#F58233] hover:text-white transition">
-              Browse Listings for New Buyers
-            </button>
+          <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {steps.map((step) => (
+              <div
+                key={step.title}
+                className="rounded-2xl border border-gray-200 bg-[#F9FAFB] p-6 shadow-sm hover:border-[#F58233] transition"
+              >
+                <h3 className="text-lg font-bold text-[#00112B]">
+                  {step.title}
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-gray-600">
+                  {step.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
+      {/* CTA BANNER */}
+      <section className="bg-[#00112B] py-16">
+        <div className="max-w-5xl mx-auto px-6 text-center">
+          <h2 className="text-white text-3xl sm:text-4xl font-bold">
+            Ready to Start Your Home Buying Journey?
+          </h2>
+
+          <div className="mt-4 text-gray-300 space-y-2">
+            <p>&ldquo;What Can I Get for $800K in Toronto?&rdquo;</p>
+            <p>&ldquo;Where can I find a Detached Home under $900K?&rdquo;</p>
+          </div>
+
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <Link
+              href="/contact-us"
+              className="inline-flex items-center justify-center h-12 px-7 rounded-full bg-[#F58233] text-white font-semibold hover:opacity-90 transition"
+            >
+              Get Expert Consultation
+            </Link>
+
+            <Link
+              href="/real-estate-for-new-buyers"
+              className="inline-flex items-center justify-center h-12 px-7 rounded-full border border-[#F58233] text-[#F58233] hover:bg-[#F58233] hover:text-white transition"
+            >
+              Browse Listings for New Buyers
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* TIPS */}
       <section className="bg-[#F4F4F4] py-24">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center">
@@ -278,6 +331,7 @@ export default function FirstTimeBuyerPage() {
         </div>
       </section>
 
+      {/* TESTIMONIALS */}
       <section className="bg-[#F4F4F4] pb-28">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center">
@@ -303,7 +357,7 @@ export default function FirstTimeBuyerPage() {
                 </div>
 
                 <p className="mt-5 text-gray-700 leading-8 italic">
-                  "{item.text}"
+                  &ldquo;{item.text}&rdquo;
                 </p>
 
                 <div className="mt-8 flex items-center gap-4">

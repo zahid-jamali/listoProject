@@ -35,22 +35,20 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-[#111827]">Explore</h3>
 
-            <div className="mt-4 space-y-3">
+            <div className="mt-4  flex flex-col gap-3">
+              <FooterLink href="/advertise">Advertise</FooterLink>
+              {/* <br /> */}
+              <FooterLink href="/real-estate-agents">Listo Team</FooterLink>
+              {/* <br /> */}
+              <FooterLink href="/join-us">Join Listo</FooterLink>
+              {/* <br /> */}
+              <FooterLink href="/contact-us">Contact Us</FooterLink>
+
               <p className="text-sm text-neutral-600 leading-6">
-                📍 Listo Brokerage
+                📍 Listo Brokerage 7 Eastvale Dr,
                 <br />
-                7 Eastvale Dr, Unit 2
-                <br />
-                Markham, ON L3S 4N8
+                Unit 2{/* <br /> */} Markham, ON L3S 4N8
               </p>
-
-              <FooterLink href="/">Advertise</FooterLink>
-
-              <FooterLink href="/">Listo Team</FooterLink>
-
-              <FooterLink href="/">Join Listo</FooterLink>
-
-              <FooterLink href="/">Contact Us</FooterLink>
             </div>
           </div>
 
@@ -59,15 +57,15 @@ export default function Footer() {
             <h3 className="font-semibold text-[#111827]">Pages</h3>
 
             <div className="mt-4 flex flex-col gap-3">
-              <FooterLink href="/new-buyers">New Buyers</FooterLink>
+              <FooterLink href="/real-estate-for-new-buyers">New Buyers</FooterLink>
 
-              <FooterLink href="/first-time-buyers">
+              <FooterLink href="/ontario-first-time-home-buyers-guide">
                 First Time Buyers Guide
               </FooterLink>
 
-              <FooterLink href="/investors">Investors</FooterLink>
+              <FooterLink href="/home-and-condos-for-investment">Investors</FooterLink>
 
-              <FooterLink href="/trendings">Trending</FooterLink>
+              <FooterLink href="/trending">Trending</FooterLink>
               <FooterLink href="/contact-us">Contact us</FooterLink>
             </div>
           </div>
@@ -77,15 +75,15 @@ export default function Footer() {
             <h3 className="opacity-0">Pages</h3>
 
             <div className="mt-4 flex flex-col gap-3">
-              <FooterLink href="/quick-browser">Browse by Location</FooterLink>
+              <FooterLink href="/real-estate-by-location">Browse by Location</FooterLink>
 
-              <FooterLink href="/faq">FAQs</FooterLink>
+              <FooterLink href="/faqs">FAQs</FooterLink>
 
               <FooterLink href="/property-management">
                 Property Management
               </FooterLink>
 
-              <FooterLink href="/new-for-you">New For You</FooterLink>
+              <FooterLink href="/user-property-feed">New For You</FooterLink>
 
               <FooterLink href="/sitemap">Sitemap</FooterLink>
             </div>
@@ -93,22 +91,29 @@ export default function Footer() {
 
           {/* Apps */}
           <div className="flex flex-col items-start">
-            <div className="flex flex-col gap-3">
-              <img
-                src="/assets/google-play.png"
-                alt="Google Play"
-                className="h-10 w-auto"
-              />
+            <div className="flex flex-col gap-3 w-full max-w-[180px]">
+              <a
+                href="https://play.google.com/store/apps/details?id=listo.app&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1"
+                className="block"
+              >
+                <img
+                  src="/assets/playstore.png"
+                  alt="Google Play"
+                  className="w-full h-auto object-contain"
+                />
+              </a>
 
-              <img
-                src="/assets/app-store.png"
-                alt="App Store"
-                className="h-10 w-auto"
-              />
+              <a href="#">
+                <img
+                  src="/assets/applestore.png"
+                  alt="App Store"
+                  className="w-full h-auto object-contain"
+                />
+              </a>
             </div>
 
             <div className="mt-6 flex gap-8">
-              <div className="text-center">
+              {/* <div className="text-center">
                 <img src="/assets/canada-flag.png" className="h-7 mx-auto" />
                 <p className="mt-2 text-sm text-neutral-700">Canada</p>
               </div>
@@ -116,7 +121,7 @@ export default function Footer() {
               <div className="text-center">
                 <img src="/assets/dubai-flag.png" className="h-7 mx-auto" />
                 <p className="mt-2 text-sm text-neutral-700">Dubai</p>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
