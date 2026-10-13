@@ -77,23 +77,23 @@ export function buildForwardHeaders(req, extraHeaders = {}) {
 
   const incomingCookie = req?.headers?.get("cookie") || req?.headers?.get("Cookie") || "";
 
-  // Extract only the auth_user cookie if present
-  let authUserCookie = "";
-  const match = incomingCookie.match(/(?:^|; )auth_user=([^;]*)/);
+  // Extract authToken or auth_user cookie if present
+  let authCookie = "";
+  const match = incomingCookie.match(/(?:^|; )(?:authToken|auth_user)=([^;]*)/);
   if (match) {
-    authUserCookie = `auth_user=${match[1]}`;
+    authCookie = `authToken=${match[1]}; auth_user=${match[1]}`;
   }
 
-  // If we have Authorization header, but no auth_user cookie yet, construct one
-  if (authHeader && !authUserCookie) {
+  // If we have Authorization header, but no cookie yet, construct one
+  if (authHeader && !authCookie) {
     const token = authHeader.replace(/^Bearer\s+/i, "").trim();
     if (token) {
-      authUserCookie = `auth_user=${token}`;
+      authCookie = `authToken=${token}; auth_user=${token}`;
     }
   }
 
-  if (authUserCookie) {
-    headers.Cookie = authUserCookie;
+  if (authCookie) {
+    headers.Cookie = authCookie;
   }
 
   headers["X-Forwarded-For"] = "";

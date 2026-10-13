@@ -36,7 +36,21 @@ export async function POST(req) {
       };
     }
 
-    return NextResponse.json(data, { status: response.status });
+    const res = NextResponse.json(data, { status: response.status });
+    if (data?.token) {
+      const oneYear = 60 * 60 * 24 * 365;
+      res.cookies.set("authToken", data.token, {
+        path: "/",
+        maxAge: oneYear,
+        sameSite: "lax",
+      });
+      res.cookies.set("auth_user", data.token, {
+        path: "/",
+        maxAge: oneYear,
+        sameSite: "lax",
+      });
+    }
+    return res;
   } catch (error) {
     console.error("Login Proxy Error:", error);
     return NextResponse.json(

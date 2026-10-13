@@ -35,9 +35,9 @@ export function AuthProvider({ children }) {
     try {
       let storedToken = sessionStorage.getItem("token");
 
-      // Fallback: read auth_user from cookie if sessionStorage is empty
+      // Fallback: read authToken or auth_user from cookie if sessionStorage is empty
       if (!storedToken && typeof document !== "undefined") {
-        const match = document.cookie.match(/(?:^|; )auth_user=([^;]*)/);
+        const match = document.cookie.match(/(?:^|; )(?:authToken|auth_user)=([^;]*)/);
         if (match) {
           storedToken = decodeURIComponent(match[1]);
           sessionStorage.setItem("token", storedToken);
@@ -64,8 +64,9 @@ export function AuthProvider({ children }) {
     sessionStorage.setItem("token", tokenVal);
     sessionStorage.setItem("user", JSON.stringify(userData));
 
-    // Set browser cookie
+    // Set browser cookies (both authToken for legacy Express backend and auth_user for frontend)
     if (typeof document !== "undefined") {
+      document.cookie = `authToken=${encodeURIComponent(tokenVal)}; path=/; max-age=31536000; SameSite=Lax`;
       document.cookie = `auth_user=${encodeURIComponent(tokenVal)}; path=/; max-age=31536000; SameSite=Lax`;
     }
 
@@ -96,8 +97,9 @@ export function AuthProvider({ children }) {
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("user");
 
-    // Clear browser cookie
+    // Clear browser cookies
     if (typeof document !== "undefined") {
+      document.cookie = "authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       document.cookie = "auth_user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     }
 

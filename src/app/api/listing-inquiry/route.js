@@ -66,7 +66,23 @@ export async function POST(req) {
     }
 
     // Passthrough legacy shape so frontend can read auth / account_exists
-    return NextResponse.json(data, { status: upstream.status });
+    const response = NextResponse.json(data, { status: upstream.status });
+
+    if (data?.auth?.token) {
+      const oneYear = 60 * 60 * 24 * 365;
+      response.cookies.set("authToken", data.auth.token, {
+        path: "/",
+        maxAge: oneYear,
+        sameSite: "lax",
+      });
+      response.cookies.set("auth_user", data.auth.token, {
+        path: "/",
+        maxAge: oneYear,
+        sameSite: "lax",
+      });
+    }
+
+    return response;
   } catch (error) {
     console.error("Listing inquiry proxy error:", error);
     return NextResponse.json(
